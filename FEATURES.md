@@ -4,6 +4,11 @@
 > **sans aucun code StarUML** (voir [LICENSES.md](LICENSES.md)).
 > Nom de travail : **Constella** (les modèles sont des étoiles, les relations des constellations).
 
+## État
+
+- **Phase 0** : validée.
+- **Phase 1** (noyau + diagramme de classes) : livrée, en attente de ta validation.
+
 ## Sources de la phase 0
 
 | Source | Statut |
@@ -13,7 +18,8 @@
 
 ## Légende
 
-- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (jamais coché autrement)
+- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (test automatisé + essai dans l'app) · `[~]` implémenté et testé en partie (tests automatisés et/ou version web), **en attente de ta validation dans l'app native** — il ne passera en `[x]` qu'après
+- Une note *partiel* indique ce qui manque encore dans la ligne.
 - **P1…P4** : phase cible · ⭐ : au-delà de StarUML
 - Chaque ligne a un identifiant stable (`UI-012`) utilisé dans les commits et les tests.
 
@@ -21,142 +27,142 @@
 
 ## 1. Concepts fondamentaux
 
-- [ ] CORE-001 (P1) Projet = élément racine unique, stocké dans un seul fichier `.mdj`
-- [ ] CORE-002 (P1) Séparation **modèle / vue** : un élément du modèle peut avoir 0..n vues, dans un ou plusieurs diagrammes ; renommer un élément met à jour toutes ses vues
-- [ ] CORE-003 (P1) Supprimer une vue (`Suppr`) ≠ supprimer du modèle (`Ctrl+Suppr`, qui supprime aussi toutes les vues)
-- [ ] CORE-004 (P1) Undo/redo illimité de **toute** modification (modèle, vue, style, diagrammes)
-- [ ] CORE-005 (P1) Identifiants stables (`_id`) et références `{"$ref": id}` comme dans `.mdj`
+- [x] CORE-001 (P1) Projet = élément racine unique, stocké dans un seul fichier `.mdj`
+- [x] CORE-002 (P1) Séparation **modèle / vue** : un élément du modèle peut avoir 0..n vues, dans un ou plusieurs diagrammes ; renommer un élément met à jour toutes ses vues
+- [x] CORE-003 (P1) Supprimer une vue (`Suppr`) ≠ supprimer du modèle (`Ctrl+Suppr`, qui supprime aussi toutes les vues)
+- [x] CORE-004 (P1) Undo/redo illimité de **toute** modification (modèle, vue, style, diagrammes)
+- [x] CORE-005 (P1) Identifiants stables (`_id`) et références `{"$ref": id}` comme dans `.mdj`
 - [ ] CORE-006 (P2) Profils UML (UML Standard Profile v2 applicable via Modèle ▸ Appliquer un profil)
-- [ ] CORE-007 (P1) Stéréotypes (choisis depuis un profil ou saisis librement), contraintes, tags (`string`, `reference`, `boolean`, `number`, `hidden`)
-- [ ] CORE-008 (P1) Documentation de chaque élément (Markdown)
-- [ ] CORE-009 (P2) Fragments `.mfj` : export de n'importe quel élément / import sous le projet
+- [ ] CORE-007 (P1) Stéréotypes (choisis depuis un profil ou saisis librement), contraintes, tags (`string`, `reference`, `boolean`, `number`, `hidden`) — *partiel* : stéréotypes libres, tags, contraintes ; manque le choix depuis un profil
+- [~] CORE-008 (P1) Documentation de chaque élément (Markdown)
+- [~] CORE-009 (P2) Fragments `.mfj` : export de n'importe quel élément / import sous le projet — export/import de fragment `.mfj` déjà disponibles
 
 ## 2. Gestion de projet & fichiers
 
-- [ ] FILE-001 (P1) Nouveau (`Ctrl+N`), Ouvrir (`Ctrl+O`), Enregistrer (`Ctrl+S`), Enregistrer sous (`Ctrl+Shift+S`), Fermer (avec demande d'enregistrement)
-- [ ] FILE-002 (P1) Lecture/écriture `.mdj` compatible StarUML (aller-retour sans perte, types inconnus conservés tels quels)
-- [ ] FILE-003 (P1) Fichiers récents
-- [ ] FILE-004 (P1) Autosave + récupération après crash
+- [~] FILE-001 (P1) Nouveau (`Ctrl+N`), Ouvrir (`Ctrl+O`), Enregistrer (`Ctrl+S`), Enregistrer sous (`Ctrl+Shift+S`), Fermer (avec demande d'enregistrement)
+- [~] FILE-002 (P1) Lecture/écriture `.mdj` compatible StarUML (aller-retour sans perte, types inconnus conservés tels quels) — aller-retour sans perte testé ; réouverture de nos fichiers *dans StarUML* non vérifiée
+- [~] FILE-003 (P1) Fichiers récents
+- [~] FILE-004 (P1) Autosave + récupération après crash — récupération testée en version web
 - [ ] FILE-005 (P2) Nouveau depuis un modèle : UML minimal, UML conventionnel, 4+1, Rational, Data Model, BPMN, C4, Wireframe
-- [ ] FILE-006 (P2) Export/import de fragment `.mfj`
-- [ ] FILE-007 (P1) Couleurs « variables » (`$background`, `$foreground`, `$transparent`, `$<teinte><1..12>`) + conversion à l'ouverture des anciens fichiers (garder/convertir)
+- [~] FILE-006 (P2) Export/import de fragment `.mfj` — export/import disponibles (P1 au lieu de P2)
+- [~] FILE-007 (P1) Couleurs « variables » (`$background`, `$foreground`, `$transparent`, `$<teinte><1..12>`) + conversion à l'ouverture des anciens fichiers (garder/convertir)
 - [ ] FILE-008 (P4) Export au format StarUML v7 (couleurs variables remplacées par les couleurs du thème clair)
 - [ ] FILE-009 (P4) Import/Export XMI 2.1 (éléments du modèle uniquement)
 - [ ] FILE-010 (P4) Import StarUML v1 (`.uml`) — *optionnel, faible priorité*
-- [ ] FILE-011 (P1) ⭐ Sauvegarde **diff-friendly** : JSON trié de façon déterministe, indenté, retours à la ligne stables (option activée par défaut, toujours lisible par StarUML)
-- [ ] FILE-012 (P1) Ouverture d'un fichier passé en argument / association MIME `.mdj` sous Linux
+- [x] FILE-011 (P1) ⭐ Sauvegarde **diff-friendly** : JSON trié de façon déterministe, indenté, retours à la ligne stables (option activée par défaut, toujours lisible par StarUML)
+- [~] FILE-012 (P1) Ouverture d'un fichier passé en argument / association MIME `.mdj` sous Linux
 
 ## 3. Export
 
-- [ ] EXP-001 (P1) Boîte « Exporter l'image » (`Ctrl+Shift+E`) : portée (diagramme courant / tous), format PNG/JPEG/SVG, fond rempli, échelle 1x/2x, marge 0–32 px, Exporter / Tout exporter (dossier) / Copier dans le presse-papiers ; options mémorisées
-- [ ] EXP-002 (P1) PNG et SVG (phase 1), JPEG (P2)
-- [ ] EXP-003 (P1) Copier le diagramme en image (`Ctrl+Shift+C`)
+- [~] EXP-001 (P1) Boîte « Exporter l'image » (`Ctrl+Shift+E`) : portée (diagramme courant / tous), format PNG/JPEG/SVG, fond rempli, échelle 1x/2x, marge 0–32 px, Exporter / Tout exporter (dossier) / Copier dans le presse-papiers ; options mémorisées — JPEG inclus ; export testé (PNG/SVG/JPEG encodés), boîte non testée en natif
+- [x] EXP-002 (P1) PNG et SVG (phase 1), JPEG (P2)
+- [~] EXP-003 (P1) Copier le diagramme en image (`Ctrl+Shift+C`) — dépend du presse-papiers d'images de WebKitGTK
 - [ ] EXP-004 (P2) Imprimer en PDF : portée, orientation, format de page (A0…A10, B, C, Letter, Legal, Tabloid…), nom du diagramme en en-tête
 - [ ] EXP-005 (P3) Documentation HTML (arbre du modèle, pages par élément, images des diagrammes, documentation)
 - [ ] EXP-006 (P3) Documentation Markdown
-- [ ] EXP-007 (P1) Export avec les couleurs du thème courant (clair/sombre)
+- [x] EXP-007 (P1) Export avec les couleurs du thème courant (clair/sombre)
 
 ## 4. Interface
 
 ### 4.1 Fenêtre principale
-- [ ] UI-001 (P1) Barre de menus : Fichier, Édition, Format, Modèle, Outils, Affichage, Aide
-- [ ] UI-002 (P1) Barre latérale gauche : Diagrammes ouverts (*Working Diagrams*) + Toolbox (`Ctrl+1`, `Ctrl+5`)
-- [ ] UI-003 (P1) Zone diagramme avec **onglets** multi-diagrammes
-- [ ] UI-004 (P1) Navigateur à droite (`Ctrl+2`) : Model Explorer + éditeurs (`Ctrl+6`)
-- [ ] UI-005 (P1) Barre d'outils (`Ctrl+3`), barre d'état (`Ctrl+4`) : chemin de l'élément, résultats de validation, bouton thème, zoom
-- [ ] UI-006 (P2) Panneau inférieur à onglets : Résultats de recherche, Validation, Miniatures (`Ctrl+Alt+T`), Documentation Markdown (`Ctrl+Alt+D`), Relations (`Ctrl+Alt+R`), Console de script (`Ctrl+Alt+J`)
-- [ ] UI-007 (P1) **Responsive** : panneaux redimensionnables, repliables ; repli automatique sous ~1100 px, menus en débordement, utilisable à partir de 1024×600 jusqu'au 4K
-- [ ] UI-008 (P1) Disposition des panneaux mémorisée
+- [~] UI-001 (P1) Barre de menus : Fichier, Édition, Format, Modèle, Outils, Affichage, Aide
+- [x] UI-002 (P1) Barre latérale gauche : Diagrammes ouverts (*Working Diagrams*) + Toolbox (`Ctrl+1`, `Ctrl+5`)
+- [x] UI-003 (P1) Zone diagramme avec **onglets** multi-diagrammes
+- [x] UI-004 (P1) Navigateur à droite (`Ctrl+2`) : Model Explorer + éditeurs (`Ctrl+6`)
+- [x] UI-005 (P1) Barre d'outils (`Ctrl+3`), barre d'état (`Ctrl+4`) : chemin de l'élément, résultats de validation, bouton thème, zoom
+- [ ] UI-006 (P2) Panneau inférieur à onglets : Résultats de recherche, Validation, Miniatures (`Ctrl+Alt+T`), Documentation Markdown (`Ctrl+Alt+D`), Relations (`Ctrl+Alt+R`), Console de script (`Ctrl+Alt+J`) — *partiel* : seul le panneau « Résultats de recherche » existe
+- [x] UI-007 (P1) **Responsive** : panneaux redimensionnables, repliables ; repli automatique sous ~1100 px, menus en débordement, utilisable à partir de 1024×600 jusqu'au 4K — testé à 1024×600, 1440×860 et ~600 px (toolbox en icônes, navigateur en surimpression)
+- [~] UI-008 (P1) Disposition des panneaux mémorisée
 
 ### 4.2 Model Explorer
-- [ ] EXPL-001 (P1) Arbre du modèle, icônes par type, recherche intégrée
-- [ ] EXPL-002 (P1) Tri par ordre d'ajout / par nom ; afficher le stéréotype ; Tout déplier / Tout replier
-- [ ] EXPL-003 (P1) Clavier : ↑ ↓ ← → , `Entrée` = renommer sur place, `Échap` = annuler
-- [ ] EXPL-004 (P1) Glisser-déposer : réorganiser / déplacer dans un autre conteneur (avec contrôle de validité)
-- [ ] EXPL-005 (P1) Glisser un élément vers un diagramme = créer une vue
-- [ ] EXPL-006 (P1) Menu contextuel : Ajouter ▸ [type], Ajouter un diagramme ▸ [type], Copier/Couper/Coller, Supprimer du modèle, Monter/Descendre (`Ctrl+Shift+↑/↓`)
-- [ ] EXPL-007 (P1) Double-clic sur un diagramme = l'ouvrir ; « Ouvrir le sous-diagramme »
-- [ ] EXPL-008 (P1) Sélectionner dans l'explorateur (`Ctrl+E`) / dans le diagramme (`Ctrl+D`)
+- [x] EXPL-001 (P1) Arbre du modèle, icônes par type, recherche intégrée
+- [~] EXPL-002 (P1) Tri par ordre d'ajout / par nom ; afficher le stéréotype ; Tout déplier / Tout replier
+- [~] EXPL-003 (P1) Clavier : ↑ ↓ ← → , `Entrée` = renommer sur place, `Échap` = annuler
+- [~] EXPL-004 (P1) Glisser-déposer : réorganiser / déplacer dans un autre conteneur (avec contrôle de validité)
+- [~] EXPL-005 (P1) Glisser un élément vers un diagramme = créer une vue
+- [~] EXPL-006 (P1) Menu contextuel : Ajouter ▸ [type], Ajouter un diagramme ▸ [type], Copier/Couper/Coller, Supprimer du modèle, Monter/Descendre (`Ctrl+Shift+↑/↓`)
+- [~] EXPL-007 (P1) Double-clic sur un diagramme = l'ouvrir ; « Ouvrir le sous-diagramme »
+- [~] EXPL-008 (P1) Sélectionner dans l'explorateur (`Ctrl+E`) / dans le diagramme (`Ctrl+D`)
 
 ### 4.3 Éditeurs
-- [ ] ED-001 (P1) Éditeur de propriétés : tous les champs du métamodèle (texte, booléen, énumération, référence avec sélecteur d'élément, liste de références)
-- [ ] ED-002 (P1) Éditeur de style : remplissage, ligne, police, style de ligne, alignement du texte, options d'affichage
-- [ ] ED-003 (P1) Éditeur de documentation **Markdown** avec aperçu
-- [ ] ED-004 (P1) Éditeur inline d'attributs / opérations / littéraux / paramètres de template
+- [x] ED-001 (P1) Éditeur de propriétés : tous les champs du métamodèle (texte, booléen, énumération, référence avec sélecteur d'élément, liste de références)
+- [~] ED-002 (P1) Éditeur de style : remplissage, ligne, police, style de ligne, alignement du texte, options d'affichage
+- [x] ED-003 (P1) Éditeur de documentation **Markdown** avec aperçu
+- [~] ED-004 (P1) Éditeur inline d'attributs / opérations / littéraux / paramètres de template
 - [ ] ED-005 (P2) Éditeur de tags (`Ctrl+T`) : attributs du stéréotype + tags libres
-- [ ] ED-006 (P1) Boîtes : Police, Couleur (palette de variables + `#rrggbb`), Sélecteur d'élément, Sélecteur dans une liste, Éditeur de liste d'éléments
+- [~] ED-006 (P1) Boîtes : Police, Couleur (palette de variables + `#rrggbb`), Sélecteur d'élément, Sélecteur dans une liste, Éditeur de liste d'éléments — *partiel* : police, couleur ; sélecteurs d'éléments simplifiés (liste)
 - [ ] ED-007 (P2) Préférences (schémas à gauche, réinitialisation par défaut)
 
 ### 4.4 Éditeur de diagramme
-- [ ] DG-001 (P1) Défilement molette / Maj+molette / bouton du milieu / `Ctrl`+glisser
-- [ ] DG-002 (P1) Zoom `Ctrl++`, `Ctrl+-`, `Ctrl+0` (taille réelle), `Ctrl+9` (ajuster), `Ctrl`+molette ; niveau affiché dans la barre d'état
-- [ ] DG-003 (P1) Minimap (`Ctrl+Alt+M`), clic pour naviguer
-- [ ] DG-004 (P1) Sélection : clic, Maj+clic, rectangle (+Maj), `Ctrl+A`, `Échap` = outil sélection
-- [ ] DG-005 (P1) Déplacement : flèches = 1 px, Maj+flèches = pas de grille
-- [ ] DG-006 (P1) Grille (`Ctrl+G`), magnétisme (`Ctrl+Shift+G`)
-- [ ] DG-007 (P1) Redimensionnement par poignées ; redimensionnement automatique (`Ctrl+Shift+R`)
-- [ ] DG-008 (P1) Liens : création par glisser source→cible, points intermédiaires, reconnexion des extrémités, étiquettes déplaçables
-- [ ] DG-009 (P1) Création d'éléments depuis la Toolbox (clic-glisser pour la taille) ; création d'un Texte par double-clic sur fond vide
-- [ ] DG-010 (P1) **Quick-edit** au double-clic ou `Entrée` (voir §5.1) ; `Maj+Entrée` = nouvelle ligne dans les textes
-- [ ] DG-011 (P1) Copier/couper/coller de vues, **y compris entre diagrammes** ; copier/coller d'éléments du modèle dans l'explorateur
-- [ ] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…)
+- [~] DG-001 (P1) Défilement molette / Maj+molette / bouton du milieu / `Ctrl`+glisser
+- [~] DG-002 (P1) Zoom `Ctrl++`, `Ctrl+-`, `Ctrl+0` (taille réelle), `Ctrl+9` (ajuster), `Ctrl`+molette ; niveau affiché dans la barre d'état — molette + Ctrl, raccourcis, barre d'état
+- [~] DG-003 (P1) Minimap (`Ctrl+Alt+M`), clic pour naviguer
+- [~] DG-004 (P1) Sélection : clic, Maj+clic, rectangle (+Maj), `Ctrl+A`, `Échap` = outil sélection
+- [~] DG-005 (P1) Déplacement : flèches = 1 px, Maj+flèches = pas de grille
+- [~] DG-006 (P1) Grille (`Ctrl+G`), magnétisme (`Ctrl+Shift+G`)
+- [~] DG-007 (P1) Redimensionnement par poignées ; redimensionnement automatique (`Ctrl+Shift+R`)
+- [~] DG-008 (P1) Liens : création par glisser source→cible, points intermédiaires, reconnexion des extrémités, étiquettes déplaçables — création, reconnexion des extrémités, points intermédiaires (oblique/courbe), étiquettes déplaçables ; les liens rectilignes sont routés automatiquement
+- [x] DG-009 (P1) Création d'éléments depuis la Toolbox (clic-glisser pour la taille) ; création d'un Texte par double-clic sur fond vide
+- [x] DG-010 (P1) **Quick-edit** au double-clic ou `Entrée` (voir §5.1) ; `Maj+Entrée` = nouvelle ligne dans les textes
+- [x] DG-011 (P1) Copier/couper/coller de vues, **y compris entre diagrammes** ; copier/coller d'éléments du modèle dans l'explorateur
+- [~] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…)
 - [ ] DG-013 (P2) Glisser-déposer d'une image sur le diagramme
 - [ ] DG-014 (P1) Rendu fluide : 60 fps en déplacement avec 500 éléments, ouverture < 1 s pour un projet de 5 000 éléments
 
 ### 4.5 Mise en forme (menu Format)
-- [ ] FMT-001 (P1) Police (`Ctrl+Shift+F`), couleur de remplissage (`Ctrl+Shift+I`), couleur de ligne (`Ctrl+Shift+L`)
-- [ ] FMT-002 (P1) Style de ligne : Rectilinéaire (`Ctrl+L`), Oblique (`Ctrl+B`), Rectangle arrondi (`Ctrl+Alt+L`), Courbe (`Ctrl+Alt+B`)
-- [ ] FMT-003 (P1) Ombre (`Ctrl+Shift+H`), Hériter du style (`Ctrl+Shift+K`), Retour à la ligne (`Ctrl+Shift+W`)
-- [ ] FMT-004 (P1) Affichage du stéréotype : Aucun / Libellé / Décoration / Décoration+libellé / Icône / Icône+libellé (`Ctrl+Shift+0…5`)
-- [ ] FMT-005 (P1) Afficher : visibilité (`Ctrl+Shift+V`), espace de noms (`Ctrl+Shift+N`), propriétés/tags (`Ctrl+Shift+B`), type (`Ctrl+Shift+Y`), multiplicité (`Ctrl+Shift+M`), signature d'opération (`Ctrl+Shift+J`), nom du diagramme (`Ctrl+Shift+D`)
-- [ ] FMT-006 (P1) Masquer : attributs (`Ctrl+Shift+A`), opérations (`Ctrl+Shift+O`), réceptions (`Ctrl+Shift+X`), littéraux (`Ctrl+Shift+T`), colonnes (`Ctrl+Shift+U`)
-- [ ] FMT-007 (P1) Alignement : gauche, droite, milieu, haut, bas, centre ; premier plan / arrière-plan
-- [ ] FMT-008 (P1) ⭐ Distribuer horizontalement / verticalement, même largeur / hauteur / taille
-- [ ] FMT-009 (P1) ⭐ Reproduire la mise en forme (*format painter*)
+- [~] FMT-001 (P1) Police (`Ctrl+Shift+F`), couleur de remplissage (`Ctrl+Shift+I`), couleur de ligne (`Ctrl+Shift+L`)
+- [~] FMT-002 (P1) Style de ligne : Rectilinéaire (`Ctrl+L`), Oblique (`Ctrl+B`), Rectangle arrondi (`Ctrl+Alt+L`), Courbe (`Ctrl+Alt+B`)
+- [~] FMT-003 (P1) Ombre (`Ctrl+Shift+H`), Hériter du style (`Ctrl+Shift+K`), Retour à la ligne (`Ctrl+Shift+W`)
+- [~] FMT-004 (P1) Affichage du stéréotype : Aucun / Libellé / Décoration / Décoration+libellé / Icône / Icône+libellé (`Ctrl+Shift+0…5`)
+- [~] FMT-005 (P1) Afficher : visibilité (`Ctrl+Shift+V`), espace de noms (`Ctrl+Shift+N`), propriétés/tags (`Ctrl+Shift+B`), type (`Ctrl+Shift+Y`), multiplicité (`Ctrl+Shift+M`), signature d'opération (`Ctrl+Shift+J`), nom du diagramme (`Ctrl+Shift+D`)
+- [~] FMT-006 (P1) Masquer : attributs (`Ctrl+Shift+A`), opérations (`Ctrl+Shift+O`), réceptions (`Ctrl+Shift+X`), littéraux (`Ctrl+Shift+T`), colonnes (`Ctrl+Shift+U`)
+- [~] FMT-007 (P1) Alignement : gauche, droite, milieu, haut, bas, centre ; premier plan / arrière-plan
+- [~] FMT-008 (P1) ⭐ Distribuer horizontalement / verticalement, même largeur / hauteur / taille
+- [~] FMT-009 (P1) ⭐ Reproduire la mise en forme (*format painter*)
 - [ ] FMT-010 (P2) Layout automatique : Auto, Haut→Bas, Bas→Haut, Gauche→Droite, Droite→Gauche
 
 ### 4.6 Annotations (toutes les toolbox)
-- [ ] ANN-001 (P1) Texte, Zone de texte, Note, Lien de note, Ligne libre (style, motif, terminaisons)
-- [ ] ANN-002 (P1) Hyperlien (URL ou référence à un élément ; double-clic = ouvrir), affichage du nom
-- [ ] ANN-003 (P1) Formes : rectangle, rectangle arrondi, ellipse
+- [~] ANN-001 (P1) Texte, Zone de texte, Note, Lien de note, Ligne libre (style, motif, terminaisons)
+- [~] ANN-002 (P1) Hyperlien (URL ou référence à un élément ; double-clic = ouvrir), affichage du nom
+- [~] ANN-003 (P1) Formes : rectangle, rectangle arrondi, ellipse
 - [ ] ANN-004 (P2) Image intégrée (PNG/JPEG/SVG), remplacement par double-clic
 
 ### 4.7 Recherche, navigation, validation
-- [ ] NAV-001 (P1) Recherche (`Ctrl+F`) : mot-clé, sensible à la casse, recherche dans la documentation ; résultats dans le panneau inférieur
-- [ ] NAV-002 (P1) Recherche rapide (`Ctrl+P`) d'éléments, vues et diagrammes
-- [ ] NAV-003 (P1) Palette de commandes (`Ctrl+Shift+P`)
-- [ ] NAV-004 (P1) Diagramme suivant/précédent (`Ctrl+Shift+]` / `[`), fermer (`F4`), fermer les autres (`Ctrl+F4`), tout fermer (`Maj+F4`)
+- [~] NAV-001 (P1) Recherche (`Ctrl+F`) : mot-clé, sensible à la casse, recherche dans la documentation ; résultats dans le panneau inférieur
+- [x] NAV-002 (P1) Recherche rapide (`Ctrl+P`) d'éléments, vues et diagrammes
+- [x] NAV-003 (P1) Palette de commandes (`Ctrl+Shift+P`)
+- [~] NAV-004 (P1) Diagramme suivant/précédent (`Ctrl+Shift+]` / `[`), fermer (`F4`), fermer les autres (`Ctrl+F4`), tout fermer (`Maj+F4`)
 - [ ] VAL-001 (P2) Validation du modèle : règles UML001–UML057 et ERD001–ERD002 (liste complète dans [docs/validation-rules.md](docs/validation-rules.md)), liste d'erreurs cliquable, compteur dans la barre d'état
 - [ ] VAL-002 (P3) ⭐ Règles personnalisées fournies par les extensions
 
 ### 4.8 Thèmes, langues, personnalisation
-- [ ] THM-001 (P1) Thèmes clair et sombre ; diagrammes redessinés selon les variables de couleur
-- [ ] THM-002 (P1) Interface en français et en anglais, changement sans redémarrage
+- [x] THM-001 (P1) Thèmes clair et sombre ; diagrammes redessinés selon les variables de couleur
+- [x] THM-002 (P1) Interface en français et en anglais, changement sans redémarrage
 - [ ] THM-003 (P2) Raccourcis personnalisables (`~/.config/constella/keymap.json`)
 - [ ] THM-004 (P2) Polices personnalisées (`~/.config/constella/fonts/<police>/font.json`)
 
 ### 4.9 Raccourcis clavier (identiques à StarUML sous Linux)
-- [ ] KEY-001 (P1) Tous les raccourcis listés dans [docs/keymap.md](docs/keymap.md) (69 commandes + raccourcis contextuels), testés automatiquement
+- [~] KEY-001 (P1) Tous les raccourcis listés dans [docs/keymap.md](docs/keymap.md) (69 commandes + raccourcis contextuels), testés automatiquement — tous les raccourcis des fonctions de la phase 1 vérifiés par test ; restent ceux des fonctions des phases suivantes
 
 ---
 
 ## 5. Diagrammes UML
 
 ### 5.1 Quick-edit (commun)
-- [ ] QE-001 (P1) Nom : `[<<stéréotype>>] [visibilité] nom` (visibilités `+ # - ~`)
-- [ ] QE-002 (P1) Attribut : `[<<st>>] [vis] nom [: type] [[multiplicité]] [= défaut]` — ex. `+nom: String [0..1] = "x"`
-- [ ] QE-003 (P1) Opération : `[<<st>>] [vis] nom [(params)] [: retour]`
+- [x] QE-001 (P1) Nom : `[<<stéréotype>>] [visibilité] nom` (visibilités `+ # - ~`)
+- [x] QE-002 (P1) Attribut : `[<<st>>] [vis] nom [: type] [[multiplicité]] [= défaut]` — ex. `+nom: String [0..1] = "x"`
+- [x] QE-003 (P1) Opération : `[<<st>>] [vis] nom [(params)] [: retour]`
 - [ ] QE-004 (P1) Paramètre de template : `[<<st>>] [vis] nom [: type] [= défaut]`
-- [ ] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`)
-- [ ] QE-006 (P1) Quick-edit des extrémités d'association (nom, multiplicité, navigabilité, agrégation)
+- [~] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`) — ajout testé ; suppression et réordonnancement à valider
+- [~] QE-006 (P1) Quick-edit des extrémités d'association (nom, multiplicité, navigabilité, agrégation)
 
 ### 5.2 Classes (P1)
-- [ ] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux)
-- [ ] CLS-002 Attributs, opérations, paramètres, réceptions, paramètres de template, substitution de template, template binding
-- [ ] CLS-003 Généralisation, Association (navigabilité, ordre des extrémités, propriété *ownership*, agrégation, composition), association n-aire, Dépendance, Réalisation d'interface, Classe d'association
-- [ ] CLS-004 Propriétés : abstrait, feuille, final, actif, statique, `isID`, `isReadOnly`, `isOrdered`, `isUnique`, `isDerived`, agrégation, défaut, `direction`, `isQuery`, `concurrency`, etc.
-- [ ] CLS-005 Frame (cadre de diagramme), Contraintes et Tags affichés
-- [ ] CLS-006 Compartiments masquables, affichage abrégé, interface requise/fournie (socket/lollipop)
+- [x] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux) — interface aussi en « lollipop » (affichage icône)
+- [ ] CLS-002 Attributs, opérations, paramètres, réceptions, paramètres de template, substitution de template, template binding — *partiel* : attributs, opérations, paramètres, réceptions, paramètres de template (affichage) ; manquent substitution et template binding
+- [ ] CLS-003 Généralisation, Association (navigabilité, ordre des extrémités, propriété *ownership*, agrégation, composition), association n-aire, Dépendance, Réalisation d'interface, Classe d'association — *partiel* : généralisation, association (navigabilité, agrégation, composition), dépendance, réalisation, réalisation d'interface ; manquent association n-aire, classe d'association, ordre des extrémités
+- [~] CLS-004 Propriétés : abstrait, feuille, final, actif, statique, `isID`, `isReadOnly`, `isOrdered`, `isUnique`, `isDerived`, agrégation, défaut, `direction`, `isQuery`, `concurrency`, etc.
+- [ ] CLS-005 Frame (cadre de diagramme), Contraintes et Tags affichés — *partiel* : tags affichés ; manquent Frame et affichage des contraintes
+- [ ] CLS-006 Compartiments masquables, affichage abrégé, interface requise/fournie (socket/lollipop) — *partiel* : compartiments masquables, lollipop ; manque socket (interface requise)
 
 ### 5.3 Paquetages (P2)
 - [ ] PKG-001 Package, Model, Subsystem, Containment, Dépendance/Import/Merge
@@ -275,8 +281,8 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 
 ## 11. Qualité & livraison
 
-- [ ] QA-001 Tests unitaires : métamodèle, opérations/undo, sérialisation `.mdj` (aller-retour sur des fichiers réels), quick-edit, générateurs, parseurs (Vitest)
-- [ ] QA-002 Corpus de fichiers `.mdj` de référence (exemples open source + fichiers générés), avec un test de non-régression par fichier
+- [x] QA-001 Tests unitaires : métamodèle, opérations/undo, sérialisation `.mdj` (aller-retour sur des fichiers réels), quick-edit, générateurs, parseurs (Vitest)
+- [ ] QA-002 Corpus de fichiers `.mdj` de référence (exemples open source + fichiers générés), avec un test de non-régression par fichier — *partiel* : 1 fichier de référence
 - [ ] QA-003 Tests E2E de l'interface (Playwright sur le frontend, `tauri-driver` pour les tests de fumée)
 - [ ] QA-004 Benchmarks de performance (DG-014) dans la CI
 - [ ] PKG-L1 (P4) AppImage

@@ -24,11 +24,11 @@
 └───────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Règle de dépendance** (vérifiée par `dependency-cruiser` dans la CI) :
-`core` ← `notation` ← `render` ← `editor` ← `ui`. `io` et `codegen` ne dépendent que de `core` (et `render` pour l'export d'images).
+**Règle de dépendance** (vérifiée par `scripts/check-layers.mjs`, lancé par `npm run check`) :
+`core` ← `notation` ⇄ `render` ← `editor` ← `ui`. `notation` utilise les primitives de dessin de `render/graphics.ts` et `render/colors.ts`, et `render/diagram.ts` orchestre les notations. `io` et `codegen` ne dépendent que de `core`.
 `core` ne connaît **ni le DOM, ni Tauri** : il s'exécute dans Node et est testé sans navigateur.
 
-## 2. Choix du moteur de diagrammes — décision à valider
+## 2. Choix du moteur de diagrammes — décision : moteur maison (phase 1)
 
 | Critère | maxGraph | **Rendu maison sur la vue `.mdj`** (recommandé) |
 |---|---|---|
@@ -75,7 +75,7 @@ maxGraph reste une solution de repli si tu préfères un démarrage plus rapide,
 
 ## 6. Interface (`ui`)
 
-- **Solid.js** (MIT) : réactivité fine et petit bundle, adapté à des panneaux très dynamiques sous WebKitGTK.
+- **Solid.js 1.9** (MIT) : réactivité fine et petit bundle, adapté à des panneaux très dynamiques sous WebKitGTK.
 - Docking simple : sidebar gauche, navigateur droit, panneau bas ; splitters ; repli automatique selon des points de rupture (≥ 1440, 1100–1439, < 1100) ; les menus passent en débordement à moins de 900 px.
 - **Design system** : tokens CSS (`--surface-*`, `--text-*`, `--accent`) avec un thème clair et un thème sombre ; police d'interface Inter (OFL), JetBrains Mono (OFL) pour le code ; icônes Lucide (ISC) et icônes UML dessinées par nous.
 - i18n : `ui/i18n/{fr,en}.json`, clés typées, changement à chaud.
@@ -131,12 +131,16 @@ constella/
 ├─ FEATURES.md · ARCHITECTURE.md · LICENSES.md
 ```
 
-## 13. Prérequis de développement (non installés sur ce poste)
+## 13. Prérequis de développement
 
-Constaté pendant la phase 0 : **Node.js, Rust/Cargo et webkit2gtk-4.1 sont absents**. Pour Arch Linux, à installer avant la phase 1 :
+Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur un hôte Arch). Installé en phase 1 :
 
-```bash
-sudo pacman -S --needed nodejs npm rustup webkit2gtk-4.1 base-devel curl wget file openssl appmenu-gtk-module libappindicator-gtk3 librsvg
-```
+- `sudo apt-get install build-essential pkg-config curl wget file libssl-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev rpm xdg-utils librsvg2-bin`
+- Rust via rustup (`~/.cargo/bin`), Node.js 22 dans `~/.local/node` (ajouter `~/.local/node/bin` et `~/.cargo/bin` au `PATH`).
 
-puis `rustup default stable`. Le paquet `.rpm` requiert `rpm-tools` ; l'AppImage se construit sans dépendance supplémentaire.
+## 14. Décisions de la phase 1
+
+- **Vues dérivées** : les compartiments, les lignes d'attributs et les étiquettes des liens (structure `.mdj`) sont recalculés par la mise en page (`arrange`), hors opérations. Seules les intentions de l'utilisateur (position, taille, style, points d'un lien oblique, position d'une étiquette) passent par des opérations.
+- **Routage** : les liens rectilignes et en rectangle arrondi sont routés automatiquement ; les liens obliques et courbes conservent les points intermédiaires de l'utilisateur.
+- **Couleurs** : les nouvelles vues utilisent les variables `$background` / `$foreground` ; à l'ouverture d'un ancien fichier en couleurs fixes, l'utilisateur peut les convertir.
+- **Export** : le SVG passe par le même code de dessin que l'écran (`Graphics`), ce qui garantit un export identique à l'affichage.

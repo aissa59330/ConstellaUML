@@ -1,0 +1,128 @@
+// View registry: each view type knows how to lay itself out (`arrange`, which
+// may update derived geometry/sub-views), draw itself and answer hit tests.
+import type { Element } from "../core/element";
+import { create } from "../core/factory";
+import { meta } from "../core/meta/registry";
+import type { Repository } from "../core/repository";
+import { type Theme, resolveColor } from "../render/colors";
+import { type FontSpec, type Graphics, type Point, type Rect, type TextMeasurer, parseFont } from "../render/graphics";
+
+export interface RenderCtx {
+  repo: Repository;
+  theme: Theme;
+  measure: TextMeasurer;
+  /** Set while drawing; undefined during arrange-only passes. */
+  g?: Graphics;
+}
+
+export interface ViewKind {
+  arrange?(v: Element, ctx: RenderCtx): void;
+  draw(v: Element, ctx: RenderCtx & { g: Graphics }): void;
+  /** Deepest selectable view under `p` (the view itself, a feature line…). */
+  hit?(v: Element, p: Point, tol: number, ctx: RenderCtx): Element | null;
+  isEdge?: boolean;
+}
+
+const kinds = new Map<string, ViewKind>();
+
+export function registerViewKind(type: string, kind: ViewKind): void {
+  kinds.set(type, kind);
+}
+
+export function viewKind(type: string): ViewKind | undefined {
+  for (const t of meta.ancestors(type)) {
+    const k = kinds.get(t);
+    if (k) return k;
+  }
+  return undefined;
+}
+
+export function isEdgeView(v: Element): boolean {
+  return meta.isKindOf(v._type, "EdgeView");
+}
+
+export function isNodeView(v: Element): boolean {
+  return meta.isKindOf(v._type, "NodeView");
+}
+
+export function boundsOf(v: Element): Rect {
+  return { x: v.left ?? 0, y: v.top ?? 0, w: v.width ?? 0, h: v.height ?? 0 };
+}
+
+// ---- style helpers --------------------------------------------------------
+
+export function colors(v: Element, ctx: RenderCtx) {
+  return {
+    line: resolveColor(v.lineColor, ctx.theme, "$foreground"),
+    fill: resolveColor(v.fillColor, ctx.theme, "$background"),
+    font: resolveColor(v.fontColor, ctx.theme, "$foreground"),
+  };
+}
+
+export function fontOf(v: Element): FontSpec {
+  return parseFont(v.font);
+}
+
+export function lineHeight(f: FontSpec): number {
+  return f.size + 2;
+}
+
+/** Word-wraps `text` (keeping explicit newlines) to `width`. */
+export function wrapText(text: string, width: number, font: FontSpec, m: TextMeasurer): string[] {
+  const out: string[] = [];
+  for (const para of text.split("\n")) {
+    if (width <= 0) {
+      out.push(para);
+      continue;
+    }
+    let line = "";
+    for (const word of para.split(/(\s+)/)) {
+      const cand = line + word;
+      if (line && m.width(cand.trimEnd(), font) > width) {
+        out.push(line.trimEnd());
+        line = word.trimStart();
+      } else line = cand;
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+// ---- derived sub-views ----------------------------------------------------
+
+/**
+ * Returns the sub-view referenced by `field`, creating it (as derived data) if
+ * missing. Keeps the .mdj structure that other tools expect.
+ */
+export function ensureSub(repo: Repository, owner: Element, field: string, type: string, init: Record<string, unknown> = {}): Element {
+  const existing = repo.deref(owner[field]);
+  if (existing && Array.isArray(owner.subViews) && owner.subViews.includes(existing)) return existing;
+  const sub = create(type, { _parent: { $ref: owner._id }, ...init });
+  (owner.subViews ??= []).push(sub);
+  owner[field] = { $ref: sub._id };
+  repo.registerDerived(sub);
+  return sub;
+}
+
+/** Makes `compartment.subViews` mirror `models` (one `viewType` per model). */
+export function syncList(repo: Repository, compartment: Element, models: Element[], viewType: string): Element[] {
+  const current: Element[] = compartment.subViews ?? [];
+  const byModel = new Map(current.map((v) => [v.model?.$ref, v]));
+  const next = models.map((m) => {
+    const found = byModel.get(m._id);
+    if (found) return found;
+    const v = create(viewType, { _parent: { $ref: compartment._id }, model: { $ref: m._id }, horizontalAlignment: 0, parentStyle: true });
+    repo.registerDerived(v);
+    return v;
+  });
+  for (const v of current) if (!next.includes(v)) repo.unregisterDerived(v);
+  compartment.subViews = next;
+  return next;
+}
+
+export function setBounds(v: Element, r: Rect): void {
+  v.left = Math.round(r.x);
+  v.top = Math.round(r.y);
+  v.width = Math.round(r.w);
+  v.height = Math.round(r.h);
+}
