@@ -1,0 +1,250 @@
+// Behavioral and remaining structural UML types (phase 2), written from the
+// UML 2.5 specification; type and field names follow the .mdj format.
+import { meta, type FieldDef, type TypeDef } from "./registry";
+
+const b = (name: string, def = false): FieldDef => ({ name, kind: "boolean", default: def, editable: true });
+const s = (name: string, def = ""): FieldDef => ({ name, kind: "string", default: def, editable: true });
+const txt = (name: string): FieldDef => ({ name, kind: "text", default: "", editable: true });
+const e = (name: string, options: string[], def: string): FieldDef => ({ name, kind: "enum", options, default: def, editable: true });
+const r = (name: string, refType?: string, editable = true): FieldDef => ({ name, kind: "ref", refType, editable });
+const refs = (name: string): FieldDef => ({ name, kind: "refs", default: [] });
+const list = (name: string): FieldDef => ({ name, kind: "elements", default: [] });
+const t = (name: string, sup: string, fields: FieldDef[] = [], contains?: Record<string, string>, abstract = false): TypeDef => ({ name, super: sup, fields, contains, abstract });
+
+export const MESSAGE_SORTS = ["synchCall", "asynchCall", "asynchSignal", "createMessage", "deleteMessage", "reply"];
+export const OPERATORS = ["alt", "opt", "par", "loop", "critical", "neg", "assert", "strict", "seq", "ignore", "consider", "break"];
+export const PSEUDOSTATE_KINDS = ["initial", "deepHistory", "shallowHistory", "join", "fork", "junction", "choice", "entryPoint", "exitPoint", "terminate"];
+
+const ACTION_KINDS = ["opaque", "create", "destroy", "read", "write", "insert", "delete", "sendSignal", "acceptSignal", "triggerEvent", "acceptEvent", "structured", "timeEvent"];
+
+export const uml2Types: TypeDef[] = [
+  // ---- use cases --------------------------------------------------------
+  t("UMLActor", "UMLClassifier"),
+  t("UMLUseCase", "UMLClassifier", [list("extensionPoints")], { UMLExtensionPoint: "extensionPoints" }),
+  t("UMLUseCaseSubject", "UMLClassifier"),
+  t("UMLExtensionPoint", "UMLModelElement"),
+  t("UMLInclude", "UMLDirectedRelationship"),
+  t("UMLExtend", "UMLDirectedRelationship", [txt("condition"), refs("extensionLocations")]),
+  // ---- components / deployment / objects ---------------------------------
+  t("UMLComponent", "UMLClass", [b("isIndirectlyInstantiated", true)]),
+  t("UMLArtifact", "UMLClassifier", [s("fileName")]),
+  t("UMLNode", "UMLClassifier"),
+  t("UMLComponentRealization", "UMLRealization"),
+  t("UMLDeployment", "UMLDependency"),
+  t("UMLCommunicationPath", "UMLAssociation"),
+  t("UMLPort", "UMLAttribute", [b("isBehavior"), b("isService", true)]),
+  t("UMLCollaboration", "UMLClassifier", [], { UMLInteraction: "ownedElements" }),
+  t("UMLCollaborationUse", "UMLModelElement", [r("type", "UMLCollaboration")]),
+  t("UMLRoleBinding", "UMLDependency", [s("roleName")]),
+  t("UMLConnector", "UMLUndirectedRelationship", [{ name: "end1", kind: "element" }, { name: "end2", kind: "element" }, r("type", "UMLAssociation")]),
+  t("UMLConnectorEnd", "UMLModelElement", [r("reference", undefined, false), s("multiplicity")]),
+  t("UMLInstance", "UMLModelElement", [r("classifier", "UMLClassifier"), list("slots"), s("value")], { UMLSlot: "slots" }, true),
+  t("UMLObject", "UMLInstance"),
+  t("UMLArtifactInstance", "UMLInstance"),
+  t("UMLComponentInstance", "UMLInstance"),
+  t("UMLNodeInstance", "UMLInstance"),
+  t("UMLSlot", "UMLModelElement", [r("definingFeature", "UMLStructuralFeature"), s("value")]),
+  t("UMLLink", "UMLUndirectedRelationship", [{ name: "end1", kind: "element" }, { name: "end2", kind: "element" }, r("association", "UMLAssociation")]),
+  t("UMLLinkEnd", "UMLModelElement", [r("reference", undefined, false), b("navigable", true)]),
+  // ---- interactions -------------------------------------------------------
+  t(
+    "UMLInteraction",
+    "UMLClassifier",
+    [list("participants"), list("messages"), list("fragments")],
+    {
+      UMLLifeline: "participants",
+      UMLGate: "participants",
+      UMLEndpoint: "participants",
+      UMLMessage: "messages",
+      UMLInteractionFragment: "fragments",
+      Diagram: "ownedElements",
+    },
+  ),
+  t("UMLLifeline", "UMLModelElement", [r("represent", "UMLAttribute"), s("selector"), b("isMultiInstance"), { name: "timingStates", kind: "text", default: "", editable: true }, { name: "timeline", kind: "text", default: "", editable: true }]),
+  t("UMLGate", "UMLModelElement"),
+  t("UMLEndpoint", "UMLModelElement"),
+  t("UMLMessage", "UMLModelElement", [
+    e("messageSort", MESSAGE_SORTS, "synchCall"),
+    r("source", undefined, false),
+    r("target", undefined, false),
+    r("connector", "UMLConnector", false),
+    r("signature", "UMLOperation"),
+    s("arguments"),
+    s("assignmentTarget"),
+    s("guard"),
+    s("sequenceNumber"),
+    b("isConcurrentIteration"),
+  ]),
+  t("UMLInteractionFragment", "UMLModelElement", [refs("covered")], undefined, true),
+  t("UMLCombinedFragment", "UMLInteractionFragment", [e("interactionOperator", OPERATORS, "alt"), list("operands")], { UMLInteractionOperand: "operands" }),
+  t("UMLInteractionOperand", "UMLInteractionFragment", [s("guard")]),
+  t("UMLInteractionUse", "UMLInteractionFragment", [r("refersTo", "UMLInteraction"), s("arguments"), s("returnValue")]),
+  t("UMLStateInvariant", "UMLInteractionFragment", [s("invariant")]),
+  t("UMLContinuation", "UMLInteractionFragment", [b("setting", true)]),
+  // ---- activities ----------------------------------------------------------
+  t(
+    "UMLActivity",
+    "UMLClassifier",
+    [list("nodes"), list("edges"), list("groups"), b("isReadOnly"), b("isSingleExecution")],
+    { UMLActivityNode: "nodes", UMLActivityEdge: "edges", UMLActivityGroup: "groups", UMLExceptionHandler: "ownedElements", Diagram: "ownedElements" },
+  ),
+  t("UMLActivityNode", "UMLModelElement", [], undefined, true),
+  t("UMLAction", "UMLActivityNode", [e("kind", ACTION_KINDS, "opaque"), list("inputs"), list("outputs"), b("isLocallyReentrant"), b("isSynchronous", true), s("language"), txt("body")], { UMLInputPin: "inputs", UMLOutputPin: "outputs" }),
+  t("UMLControlNode", "UMLActivityNode", [], undefined, true),
+  t("UMLInitialNode", "UMLControlNode"),
+  t("UMLFinalNode", "UMLControlNode", [], undefined, true),
+  t("UMLActivityFinalNode", "UMLFinalNode"),
+  t("UMLFlowFinalNode", "UMLFinalNode"),
+  t("UMLForkNode", "UMLControlNode"),
+  t("UMLJoinNode", "UMLControlNode"),
+  t("UMLMergeNode", "UMLControlNode"),
+  t("UMLDecisionNode", "UMLControlNode"),
+  t("UMLObjectNode", "UMLActivityNode", [{ name: "type", kind: "typeRef", default: "", refType: "UMLClassifier", editable: true }, e("ordering", ["unordered", "ordered", "LIFO", "FIFO"], "FIFO"), s("upperBound")]),
+  t("UMLCentralBufferNode", "UMLObjectNode"),
+  t("UMLDataStoreNode", "UMLCentralBufferNode"),
+  t("UMLActivityParameterNode", "UMLObjectNode"),
+  t("UMLPin", "UMLObjectNode", [], undefined, true),
+  t("UMLInputPin", "UMLPin"),
+  t("UMLOutputPin", "UMLPin"),
+  t("UMLExpansionNode", "UMLObjectNode"),
+  t("UMLActivityGroup", "UMLModelElement", [], undefined, true),
+  t("UMLActivityPartition", "UMLActivityGroup", [b("isDimension"), b("isExternal"), list("subpartitions"), r("represents")], { UMLActivityPartition: "subpartitions" }),
+  t("UMLInterruptibleActivityRegion", "UMLActivityGroup"),
+  t("UMLStructuredActivityNode", "UMLAction", [b("mustIsolate")]),
+  t("UMLExpansionRegion", "UMLStructuredActivityNode", [e("mode", ["parallel", "iterative", "stream"], "iterative")]),
+  t("UMLActivityEdge", "UMLDirectedRelationship", [s("guard"), s("weight")], undefined, true),
+  t("UMLControlFlow", "UMLActivityEdge"),
+  t("UMLObjectFlow", "UMLActivityEdge", [b("isMulticast"), b("isMultireceive")]),
+  t("UMLActivityInterrupt", "UMLActivityEdge"),
+  t("UMLExceptionHandler", "UMLDirectedRelationship", [refs("exceptionTypes")]),
+  // ---- state machines ---------------------------------------------------------
+  t("UMLStateMachine", "UMLClassifier", [list("regions")], { UMLRegion: "regions", Diagram: "ownedElements" }),
+  t("UMLRegion", "UMLModelElement", [list("vertices"), list("transitions")], { UMLVertex: "vertices", UMLTransition: "transitions" }),
+  t("UMLVertex", "UMLModelElement", [], undefined, true),
+  t("UMLState", "UMLVertex", [list("regions"), list("entryActivities"), list("doActivities"), list("exitActivities"), r("submachine", "UMLStateMachine"), list("connections")], {
+    UMLRegion: "regions",
+    UMLConnectionPointReference: "connections",
+  }),
+  t("UMLFinalState", "UMLState"),
+  t("UMLPseudostate", "UMLVertex", [e("kind", PSEUDOSTATE_KINDS, "initial")]),
+  t("UMLConnectionPointReference", "UMLVertex", [refs("entry"), refs("exit")]),
+  t("UMLTransition", "UMLDirectedRelationship", [e("kind", ["external", "internal", "local"], "external"), s("guard"), list("triggers"), list("effects")], { UMLEvent: "triggers", UMLBehavior: "effects" }),
+  t("UMLEvent", "UMLModelElement", [e("kind", ["signal", "call", "change", "time", "anyReceive"], "anyReceive"), s("value")]),
+  t("UMLBehavior", "UMLModelElement", [], undefined, true),
+  t("UMLOpaqueBehavior", "UMLBehavior", [txt("body"), s("language")]),
+  // ---- profiles & information flows -------------------------------------------
+  t("UMLMetaClass", "UMLModelElement"),
+  t("UMLExtension", "UMLDirectedRelationship", [b("isRequired")]),
+  t("UMLInformationItem", "UMLClassifier", [refs("represented")]),
+  t("UMLInformationFlow", "UMLDirectedRelationship", [refs("conveyed"), s("conveyedText")]),
+  // ---- diagrams ---------------------------------------------------------------
+  ...[
+    "UMLUseCaseDiagram",
+    "UMLPackageDiagram",
+    "UMLObjectDiagram",
+    "UMLCompositeStructureDiagram",
+    "UMLComponentDiagram",
+    "UMLDeploymentDiagram",
+    "UMLSequenceDiagram",
+    "UMLCommunicationDiagram",
+    "UMLTimingDiagram",
+    "UMLInteractionOverviewDiagram",
+    "UMLActivityDiagram",
+    "UMLStatechartDiagram",
+    "UMLProfileDiagram",
+    "UMLInformationFlowDiagram",
+  ].map((n) => t(n, "UMLDiagram")),
+];
+
+/** Phase-2 view types. All their fields are inherited from the generic views. */
+export const uml2ViewTypes: TypeDef[] = [
+  ...[
+    "UMLActorView",
+    "UMLUseCaseView",
+    "UMLComponentView",
+    "UMLArtifactView",
+    "UMLNodeView",
+    "UMLCollaborationView",
+    "UMLStereotypeView",
+    "UMLMetaClassView",
+    "UMLInformationItemView",
+    "UMLStateMachineView",
+    "UMLInteractionView",
+    "UMLActivityView",
+  ].map((n) => t(n, "UMLClassifierView")),
+  t("UMLProfileView", "UMLPackageView"),
+  ...[
+    "UMLUseCaseSubjectView",
+    "UMLObjectView",
+    "UMLArtifactInstanceView",
+    "UMLComponentInstanceView",
+    "UMLNodeInstanceView",
+    "UMLPortView",
+    "UMLPartView",
+    "UMLCollaborationUseView",
+    "UMLSeqLifelineView",
+    "UMLCommLifelineView",
+    "UMLTimingLifelineView",
+    "UMLCombinedFragmentView",
+    "UMLInteractionOperandView",
+    "UMLInteractionUseView",
+    "UMLStateInvariantView",
+    "UMLContinuationView",
+    "UMLEndpointView",
+    "UMLGateView",
+    "UMLActionView",
+    "UMLInitialNodeView",
+    "UMLActivityFinalNodeView",
+    "UMLFlowFinalNodeView",
+    "UMLForkNodeView",
+    "UMLJoinNodeView",
+    "UMLMergeNodeView",
+    "UMLDecisionNodeView",
+    "UMLObjectNodeView",
+    "UMLCentralBufferNodeView",
+    "UMLDataStoreNodeView",
+    "UMLActivityParameterNodeView",
+    "UMLInputPinView",
+    "UMLOutputPinView",
+    "UMLExpansionNodeView",
+    "UMLSwimlaneView",
+    "UMLInterruptibleActivityRegionView",
+    "UMLStructuredActivityNodeView",
+    "UMLExpansionRegionView",
+    "UMLStateView",
+    "UMLFinalStateView",
+    "UMLPseudostateView",
+    "UMLConnectionPointReferenceView",
+    "UMLFrameView",
+  ].map((n) => t(n, "UMLGeneralNodeView")),
+  t("UMLSwimlaneView", "UMLGeneralNodeView", [b("isVertical", true)]),
+  ...[
+    "UMLIncludeView",
+    "UMLExtendView",
+    "UMLComponentRealizationView",
+    "UMLDeploymentView",
+    "UMLCommunicationPathView",
+    "UMLConnectorView",
+    "UMLLinkView",
+    "UMLRoleBindingView",
+    "UMLSeqMessageView",
+    "UMLCommMessageView",
+    "UMLControlFlowView",
+    "UMLObjectFlowView",
+    "UMLExceptionHandlerView",
+    "UMLActivityInterruptView",
+    "UMLTransitionView",
+    "UMLExtensionView",
+    "UMLInformationFlowView",
+    "UMLContainmentView",
+  ].map((n) => t(n, "UMLGeneralEdgeView")),
+];
+
+let registered = false;
+export function registerUml2Meta(): void {
+  if (registered) return;
+  registered = true;
+  meta.register([...uml2Types, ...uml2ViewTypes]);
+  // Packages may also own the new top-level kinds (already covered by UMLModelElement),
+  // and classifiers may own behaviors (activities, state machines, interactions).
+}

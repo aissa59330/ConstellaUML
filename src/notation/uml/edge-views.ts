@@ -6,18 +6,19 @@ import { stereotypeName, visibilitySymbol } from "./text";
 
 const labelCache = new WeakMap<Element, Element[]>();
 
-function generalLabels(e: Element, ctx: RenderCtx): LabelSpec[] {
+export function generalLabels(e: Element, ctx: RenderCtx, keyword?: string, nameText?: string): LabelSpec[] {
   const model = ctx.repo.deref(e.model);
   const st = model ? stereotypeName(model.stereotype, (r) => ctx.repo.deref(r)) : "";
   const vis = model && e.showVisibility !== false && model.name ? visibilitySymbol(model.visibility) : "";
+  const kws = [keyword, st].filter(Boolean).join(", ");
   return [
-    { field: "nameLabel", edgePosition: 1, alpha: Math.PI / 2, distance: 15, text: model?.name ? vis + model.name : "" },
-    { field: "stereotypeLabel", edgePosition: 1, alpha: Math.PI / 2, distance: 30, text: st && e.stereotypeDisplay !== "none" ? `«${st}»` : "" },
+    { field: "nameLabel", edgePosition: 1, alpha: Math.PI / 2, distance: 15, text: nameText ?? (model?.name ? vis + model.name : "") },
+    { field: "stereotypeLabel", edgePosition: 1, alpha: Math.PI / 2, distance: 30, text: kws && e.stereotypeDisplay !== "none" ? `«${kws}»` : "" },
     { field: "propertyLabel", edgePosition: 1, alpha: -Math.PI / 2, distance: 15, text: "" },
   ];
 }
 
-interface EdgeStyle {
+export interface EdgeStyle {
   dashed: boolean;
   head: EndStyle;
   tail: EndStyle;
@@ -28,7 +29,7 @@ function hit(e: Element, p: { x: number; y: number }, tol: number, ctx: RenderCt
   return hitEdge(e, p, tol, ctx) ? e : null;
 }
 
-function makeEdgeKind(style: (e: Element, ctx: RenderCtx) => EdgeStyle, labels: (e: Element, ctx: RenderCtx) => LabelSpec[] = generalLabels) {
+export function makeEdgeKind(style: (e: Element, ctx: RenderCtx) => EdgeStyle, labels: (e: Element, ctx: RenderCtx) => LabelSpec[] = generalLabels) {
   return {
     isEdge: true,
     arrange(e: Element, ctx: RenderCtx) {

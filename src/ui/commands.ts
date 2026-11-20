@@ -7,6 +7,7 @@ import type { DiagramEditor } from "../editor/DiagramEditor";
 import { exportFragment, parseMdj } from "../io/mdj";
 import {
   addDiagram,
+  DIAGRAM_TYPES,
   addViewOfModel,
   copyModel,
   copyViews,
@@ -349,18 +350,21 @@ register(
   { id: "format:send-to-back", label: "cmd.format.sendToBack", run: () => reorderViews(false), enabled: hasViews },
   { id: "format:painter", label: "cmd.format.painter", run: () => setPainterSource(selectedViews()[0] ?? null), enabled: () => selectedViews().length === 1, checked: () => !!painterSource() },
 
-  {
-    id: "model:add-class-diagram",
-    label: "cmd.model.addClassDiagram",
+  ...DIAGRAM_TYPES.map(({ type }) => ({
+    id: `model:add-diagram-${type}`,
+    label: `diagram.${type}`,
     run: () => {
-      const owner = s.modelOf(sel()[0] ?? s.repo.root!) ?? s.repo.root!;
-      const target = meta.containerField(owner._type, "UMLClassDiagram") || owner === s.repo.root ? owner : s.repo.parentOf(owner) ?? s.repo.root!;
-      const d = addDiagram(s.repo, target);
+      let owner = s.modelOf(sel()[0] ?? s.repo.root!) ?? s.repo.root!;
+      if (meta.isKindOf(owner._type, "Diagram")) owner = s.repo.parentOf(owner) ?? s.repo.root!;
+      // Diagrams go into packages / classifiers; anything else adds to its owner.
+      while (owner !== s.repo.root && !meta.isKindOf(owner._type, "UMLPackage") && !meta.isKindOf(owner._type, "UMLClassifier")) owner = s.repo.parentOf(owner) ?? s.repo.root!;
+      if (owner === s.repo.root) owner = (s.repo.root!.ownedElements ?? []).find((e: Element) => meta.isKindOf(e._type, "UMLPackage")) ?? s.repo.root!;
+      const d = addDiagram(s.repo, owner, type);
       s.openDiagram(d._id);
       s.select([d]);
     },
     enabled: hasProject,
-  },
+  })),
   { id: "model:find", label: "cmd.model.find", keys: ["Ctrl+F"], run: () => s.setDialog({ kind: "find" }), enabled: hasProject },
 
   { id: "view:quick-find", label: "cmd.view.quickFind", keys: ["Ctrl+P"], run: () => s.setDialog({ kind: "quickFind" }) },
@@ -555,7 +559,7 @@ export const MAIN_MENU: { label: string; items: MenuItem[] }[] = [
   },
   {
     label: "menu.model",
-    items: [{ label: "cmd.model.addDiagram", children: [{ cmd: "model:add-class-diagram" }] }, { sep: true }, { cmd: "model:find" }],
+    items: [{ label: "cmd.model.addDiagram", children: DIAGRAM_TYPES.map(({ type }) => ({ cmd: `model:add-diagram-${type}` })) }, { sep: true }, { cmd: "model:find" }],
   },
   { label: "menu.tools", items: [{ cmd: "view:command-palette" }] },
   {

@@ -6,7 +6,7 @@ import type { Repository, Transaction } from "../../core/repository";
 import { formatPoints, parsePoints } from "../edges";
 import type { Rect } from "../../render/graphics";
 import { type EdgeTool, type NodeTool, VIEW_FOR_MODEL } from "./toolbox";
-import { ParseError, parseAttribute, parseName, parseOperation } from "./text";
+import { ParseError, parseAttribute, parseFlow, parseMessage, parseName, parseOperation, parseTransition } from "./text";
 
 export class CommandError extends Error {}
 
@@ -15,32 +15,98 @@ export function namespaceOf(repo: Repository, diagram: Element): Element {
   return repo.parentOf(diagram) ?? repo.root!;
 }
 
+/**
+ * Where a new model element of `type` goes: the container's model when it can
+ * hold it, else the diagram's namespace (state machines put vertices and
+ * transitions in their first region).
+ */
+export function ownerFor(repo: Repository, tx: Transaction, diagram: Element, type: string, preferred?: Element): [Element, string] {
+  if (preferred) {
+    let target = preferred;
+    if (meta.isKindOf(target._type, "UMLState") && (meta.isKindOf(type, "UMLVertex") || type === "UMLTransition")) target = regionOf(tx, target);
+    const f = meta.containerField(target._type, type);
+    if (f && !(f === "ownedElements" && meta.isKindOf(type, "UMLActivityNode"))) return [target, f];
+  }
+  let ns = namespaceOf(repo, diagram);
+  if (ns._type === "UMLStateMachine" && (meta.isKindOf(type, "UMLVertex") || type === "UMLTransition")) ns = regionOf(tx, ns);
+  return [ns, meta.containerField(ns._type, type) ?? "ownedElements"];
+}
+
+/** First region of a state machine / composite state (created on demand). */
+function regionOf(tx: Transaction, owner: Element): Element {
+  const existing = (owner.regions ?? [])[0];
+  if (existing) return existing;
+  return tx.insert(owner, "regions", create("UMLRegion"));
+}
+
 function viewDefaults(viewType: string): Record<string, unknown> {
   const d: Record<string, unknown> = {};
   if (viewType === "UMLInterfaceView") d.suppressAttributes = false;
   return d;
 }
 
-export function createNode(repo: Repository, diagram: Element, tool: NodeTool, rect: Rect): Element {
+export function createNode(repo: Repository, diagram: Element, tool: NodeTool, rect: Rect, container?: Element): Element {
   return repo.transact(`Create ${tool.id}`, (tx) => {
     let model: Element | undefined;
     if (tool.modelType) {
-      const owner = namespaceOf(repo, diagram);
-      const field = meta.containerField(owner._type, tool.modelType) ?? "ownedElements";
-      model = create(tool.modelType, { name: uniqueName(tool.baseName ?? "Element", owner[field]), ...tool.init });
+      const [owner, field] = ownerFor(repo, tx, diagram, tool.modelType, container ? repo.deref(container.model) : undefined);
+      const nameless = meta.isKindOf(tool.modelType, "UMLControlNode") || tool.modelType === "UMLPseudostate" || tool.modelType === "UMLFinalState";
+      model = create(tool.modelType, { ...(nameless ? {} : { name: uniqueName(tool.baseName ?? "Element", owner[field]) }), ...tool.init });
+      if (tool.modelType === "UMLCombinedFragment") model.operands = [create("UMLInteractionOperand", { _parent: ref(model), guard: "" })];
+      if (tool.modelType === "UMLLifeline" && diagram._type === "UMLTimingDiagram" && !model.timingStates) Object.assign(model, { timingStates: "Actif, Inactif", timeline: "Inactif@0; Actif@10; Inactif@30" });
       tx.insert(owner, field, model);
     }
     const view = create(tool.viewType, {
       ...(model ? { model: ref(model) } : {}),
       left: Math.round(rect.x),
       top: Math.round(rect.y),
-      width: Math.round(Math.max(rect.w, 20)),
-      height: Math.round(Math.max(rect.h, 20)),
+      width: Math.round(Math.max(rect.w, 4)),
+      height: Math.round(Math.max(rect.h, 4)),
       ...viewDefaults(tool.viewType),
       ...tool.viewInit,
     });
+    if (container) {
+      view.containerView = ref(container);
+      tx.set(container, "containedViews", [...(container.containedViews ?? []), ref(view)]);
+    }
     tx.insert(diagram, "ownedViews", view);
     return view;
+  });
+}
+
+/** Views nested in `v` (recursively), e.g. use cases inside a subject. */
+export function containedViewsOf(repo: Repository, v: Element): Element[] {
+  const out: Element[] = [];
+  const visit = (x: Element) => {
+    for (const r of (x.containedViews ?? []) as { $ref: string }[]) {
+      const c = repo.get(r.$ref);
+      if (c && !out.includes(c)) {
+        out.push(c);
+        visit(c);
+      }
+    }
+  };
+  visit(v);
+  return out;
+}
+
+/** Re-parents a view into another container view (or out of any). */
+export function setContainer(repo: Repository, view: Element, container: Element | null): void {
+  const old = repo.deref(view.containerView);
+  if (old === container || view === container) return;
+  if (container && containedViewsOf(repo, view).includes(container)) return;
+  repo.transact("Move into", (tx) => {
+    if (old) tx.set(old, "containedViews", (old.containedViews ?? []).filter((r: { $ref: string }) => r.$ref !== view._id));
+    if (container) {
+      tx.set(container, "containedViews", [...(container.containedViews ?? []), ref(view)]);
+      tx.set(view, "containerView", ref(container));
+      // Draw order: a nested view (and its own children) must come after its container.
+      const diagram = repo.diagramOf(view);
+      const views: Element[] = diagram?.ownedViews ?? [];
+      if (diagram && views.indexOf(view) < views.indexOf(container)) {
+        for (const v of [view, ...containedViewsOf(repo, view)]) tx.move(v, diagram, "ownedViews", diagram.ownedViews.length);
+      }
+    } else tx.set(view, "containerView", undefined);
   });
 }
 
@@ -67,11 +133,34 @@ export function canConnect(repo: Repository, tool: EdgeTool, tail: Element, head
     case "interfaceRealization":
       if (!isClassifier(tm) || hm._type !== "UMLInterface") return "La réalisation d'interface va d'un classificateur vers une interface.";
       return null;
-    case "dependency":
-    case "realization":
-      return null;
-    default:
+    case "association":
+    case "directedAssociation":
+    case "aggregation":
+    case "composition":
       return isClassifier(tm) && isClassifier(hm) ? null : "L'association relie deux classificateurs.";
+    case "include":
+    case "extend":
+      return tm._type === "UMLUseCase" && hm._type === "UMLUseCase" ? null : "Ce lien relie deux cas d'utilisation.";
+    case "transition":
+      return meta.isKindOf(tm._type, "UMLVertex") && meta.isKindOf(hm._type, "UMLVertex") ? null : "Une transition relie deux états.";
+    case "controlFlow":
+    case "objectFlow":
+    case "activityInterrupt":
+    case "exceptionHandler":
+      // Interaction overview diagrams also chain interaction uses / inline interactions.
+      return [tm, hm].every((m) => meta.isKindOf(m._type, "UMLActivityNode") || meta.isKindOf(m._type, "UMLInteractionFragment") || m._type === "UMLInteraction") ? null : "Un flot relie deux nœuds d'activité.";
+    case "syncMessage":
+    case "asyncMessage":
+    case "replyMessage":
+    case "createMessage":
+    case "deleteMessage":
+    case "commMessage":
+    case "commAsyncMessage":
+      return tm._type === "UMLLifeline" && hm._type === "UMLLifeline" ? null : "Un message relie deux lignes de vie.";
+    case "extension":
+      return tm._type === "UMLStereotype" && hm._type === "UMLMetaClass" ? null : "Une extension va d'un stéréotype vers une métaclasse.";
+    default:
+      return null;
   }
 }
 
@@ -80,34 +169,73 @@ export function createEdge(repo: Repository, diagram: Element, tool: EdgeTool, t
   if (reason) throw new CommandError(reason);
   return repo.transact(`Create ${tool.id}`, (tx) => {
     let model: Element | undefined;
+    if (tool.modelType === "UMLMessage" && tool.viewType === "UMLConnectorView") return createCommMessage(repo, tx, diagram, tool, tail, head);
     if (tool.modelType) {
       const tm = repo.deref(tail.model)!, hm = repo.deref(head.model)!;
-      // Relationships are owned by their source (as in .mdj files).
-      const owner = meta.containerField(tm._type, tool.modelType) ? tm : namespaceOf(repo, diagram);
-      if (tool.modelType === "UMLAssociation") {
-        model = create("UMLAssociation");
-        const end1 = create("UMLAssociationEnd", { reference: ref(tm), _parent: ref(model) });
-        const end2 = create("UMLAssociationEnd", { reference: ref(hm), _parent: ref(model) });
+      // Relationships are owned by their source (as in .mdj files), unless the
+      // behavior has a dedicated list (activity edges, transitions, messages).
+      const [nsOwner, nsField] = ownerFor(repo, tx, diagram, tool.modelType);
+      const dedicated = nsField !== "ownedElements";
+      const owner = dedicated ? nsOwner : meta.containerField(tm._type, tool.modelType) ? tm : nsOwner;
+      const field = dedicated ? nsField : "ownedElements";
+      if (tool.modelType === "UMLMessage") {
+        model = create("UMLMessage", { name: tool.variant === "reply" ? "" : uniqueName("message", owner.messages), messageSort: tool.variant ?? "synchCall", source: ref(tm), target: ref(hm) });
+        tx.insert(owner, field, model);
+      } else if (["UMLAssociation", "UMLCommunicationPath", "UMLConnector", "UMLLink"].includes(tool.modelType)) {
+        model = create(tool.modelType);
+        const endType = tool.modelType === "UMLConnector" ? "UMLConnectorEnd" : tool.modelType === "UMLLink" ? "UMLLinkEnd" : "UMLAssociationEnd";
+        const end1 = create(endType, { reference: ref(tm), _parent: ref(model) });
+        const end2 = create(endType, { reference: ref(hm), _parent: ref(model) });
         if (tool.variant === "directed") end1.navigable = false;
         if (tool.variant === "aggregation") end1.aggregation = "shared";
         if (tool.variant === "composition") end1.aggregation = "composite";
         model.end1 = end1;
         model.end2 = end2;
+        tx.insert(owner, field, model);
       } else {
         model = create(tool.modelType, { source: ref(tm), target: ref(hm) });
+        if (tool.modelType === "UMLDependency" && tool.variant) model.stereotype = tool.variant;
+        tx.insert(owner, field, model);
       }
-      tx.insert(owner, "ownedElements", model);
+    }
+    if (tool.id === "containment") {
+      const owner = repo.deref(tail.model), child = repo.deref(head.model);
+      if (owner && child) {
+        const f = meta.containerField(owner._type, child._type);
+        if (!f) throw new CommandError(`${owner.name ?? owner._type} ne peut pas contenir ${child.name ?? child._type}.`);
+        tx.move(child, owner, f);
+      }
     }
     const view = create(tool.viewType, {
       ...(model ? { model: ref(model) } : {}),
       tail: ref(tail),
       head: ref(head),
-      lineStyle: tool.id === "noteLink" || tool.id === "freeline" ? 1 : 0,
+      lineStyle: tool.id === "noteLink" || tool.id === "freeline" || tool.viewType === "UMLSeqMessageView" || tool.viewType === "UMLTransitionView" ? 1 : 0,
       points: points ?? "",
     });
     tx.insert(diagram, "ownedViews", view);
     return view;
   });
+}
+
+/** Communication message: reuses (or creates) the connector between two lifelines. */
+function createCommMessage(repo: Repository, tx: Transaction, diagram: Element, tool: EdgeTool, tail: Element, head: Element): Element {
+  const tm = repo.deref(tail.model)!, hm = repo.deref(head.model)!;
+  let connView = ((diagram.ownedViews ?? []) as Element[]).find(
+    (v) => v._type === "UMLConnectorView" && ((v.tail?.$ref === tail._id && v.head?.$ref === head._id) || (v.tail?.$ref === head._id && v.head?.$ref === tail._id)),
+  );
+  const [owner] = ownerFor(repo, tx, diagram, "UMLMessage");
+  if (!connView) {
+    const conn = create("UMLConnector");
+    conn.end1 = create("UMLConnectorEnd", { reference: ref(tm), _parent: ref(conn) });
+    conn.end2 = create("UMLConnectorEnd", { reference: ref(hm), _parent: ref(conn) });
+    tx.insert(owner, "ownedElements", conn);
+    connView = create("UMLConnectorView", { model: ref(conn), tail: ref(tail), head: ref(head), lineStyle: 1, points: "" });
+    tx.insert(diagram, "ownedViews", connView);
+  }
+  const msg = create("UMLMessage", { name: uniqueName("message", owner.messages), messageSort: tool.variant ?? "synchCall", source: ref(tm), target: ref(hm), connector: connView.model });
+  tx.insert(owner, "messages", msg);
+  return connView;
 }
 
 /** Creates a view of an existing model element (drag from the explorer). */
@@ -164,6 +292,7 @@ function closeOverEdges(repo: Repository, views: Set<Element>): Set<Element> {
 export function deleteViews(repo: Repository, selection: Element[]): void {
   const features = selection.filter(isFeatureView).map((v) => repo.deref(v.model)).filter((m): m is Element => !!m);
   const top = new Set(selection.filter((v) => !isFeatureView(v) && !isLabel(v) && repo.diagramOf(v)?.ownedViews?.includes(v)));
+  for (const v of [...top]) for (const c of containedViewsOf(repo, v)) top.add(c);
   if (top.size === 0 && features.length === 0) return;
   repo.transact("Delete", (tx) => {
     for (const f of features) if (repo.get(f._id)) tx.remove(f);
@@ -264,6 +393,38 @@ function writeOperation(tx: Transaction, op: Element, p: ReturnType<typeof parse
   } else if (ret && p.parameters !== undefined) tx.remove(ret);
 }
 
+/** Quick edit of a transition: "evt1, evt2 [guard] / action". */
+export function editTransition(repo: Repository, tr: Element, expression: string): void {
+  const p = parseTransition(expression);
+  repo.transact("Edit transition", (tx) => {
+    for (const old of [...(tr.triggers ?? [])]) tx.remove(old);
+    for (const old of [...(tr.effects ?? [])]) tx.remove(old);
+    for (const name of p.triggers) tx.insert(tr, "triggers", create("UMLEvent", { name }));
+    for (const name of p.effects) tx.insert(tr, "effects", create("UMLOpaqueBehavior", { name }));
+    tx.set(tr, "guard", p.guard);
+  });
+}
+
+/** Quick edit of a message: "[guard] result = name(args)". */
+export function editMessage(repo: Repository, msg: Element, expression: string): void {
+  const p = parseMessage(expression);
+  repo.transact("Edit message", (tx) => {
+    tx.set(msg, "name", p.name);
+    tx.set(msg, "arguments", p.arguments);
+    tx.set(msg, "assignmentTarget", p.assignmentTarget);
+    tx.set(msg, "guard", p.guard);
+  });
+}
+
+/** Quick edit of an activity edge: "[guard] name". */
+export function editFlow(repo: Repository, flow: Element, expression: string): void {
+  const p = parseFlow(expression);
+  repo.transact("Edit flow", (tx) => {
+    tx.set(flow, "guard", p.guard);
+    tx.set(flow, "name", p.name);
+  });
+}
+
 export type FeatureKind = "attributes" | "operations" | "literals" | "receptions";
 
 const FEATURE_TYPE: Record<FeatureKind, string> = {
@@ -325,10 +486,30 @@ export function addModelElement(repo: Repository, owner: Element, type: string):
   });
 }
 
+const BEHAVIOR_FOR: Record<string, string> = {
+  UMLSequenceDiagram: "UMLInteraction",
+  UMLCommunicationDiagram: "UMLInteraction",
+  UMLTimingDiagram: "UMLInteraction",
+  UMLInteractionOverviewDiagram: "UMLActivity",
+  UMLActivityDiagram: "UMLActivity",
+  UMLStatechartDiagram: "UMLStateMachine",
+};
+
+/**
+ * Adds a diagram. Behavior diagrams live inside their behavior (interaction,
+ * activity, state machine), created on the fly unless `owner` already is one.
+ */
 export function addDiagram(repo: Repository, owner: Element, type = "UMLClassDiagram"): Element {
   return repo.transact("Add diagram", (tx) => {
+    let target = owner;
+    const behavior = BEHAVIOR_FOR[type];
+    if (behavior && owner._type !== behavior) {
+      const field = meta.containerField(owner._type, behavior) ?? "ownedElements";
+      target = tx.insert(owner, field, create(behavior, { name: uniqueName(behavior.replace(/^UML/, ""), owner[field]) }));
+      if (behavior === "UMLStateMachine") tx.insert(target, "regions", create("UMLRegion"));
+    }
     const base = type.replace(/^UML/, "");
-    return tx.insert(owner, "ownedElements", create(type, { name: uniqueName(base, owner.ownedElements) }));
+    return tx.insert(target, "ownedElements", create(type, { name: uniqueName(base, target.ownedElements) }));
   });
 }
 
@@ -337,7 +518,8 @@ export function addDiagram(repo: Repository, owner: Element, type = "UMLClassDia
 /** Moves node views (and bend points of edges whose both ends move). */
 export function moveViews(repo: Repository, views: Element[], dx: number, dy: number, mergeKey?: string): void {
   if (dx === 0 && dy === 0) return;
-  const nodes = views.filter((v) => meta.isKindOf(v._type, "NodeView") && v._type !== "EdgeLabelView");
+  const direct = views.filter((v) => meta.isKindOf(v._type, "NodeView") && v._type !== "EdgeLabelView");
+  const nodes = [...new Set([...direct, ...direct.flatMap((v) => containedViewsOf(repo, v))])];
   const ids = new Set(nodes.map((n) => n._id));
   repo.transact(
     "Move",

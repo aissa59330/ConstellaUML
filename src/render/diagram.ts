@@ -1,5 +1,6 @@
 import type { Element } from "../core/element";
-import { type RenderCtx, boundsOf, isEdgeView, viewKind } from "../notation/views";
+import { assignPorts } from "../notation/edges";
+import { type RenderCtx, boundsOf, isEdgeView, paintedBoundsOf, paintedExtraOf, viewKind } from "../notation/views";
 import "../notation/uml";
 import { type Theme, resolveColor } from "./colors";
 import { type Graphics, type Point, type Rect, type TextMeasurer, union } from "./graphics";
@@ -16,6 +17,7 @@ export function diagramViews(diagram: Element): { nodes: Element[]; edges: Eleme
 export function arrangeDiagram(diagram: Element, ctx: RenderCtx): void {
   const { nodes, edges } = diagramViews(diagram);
   for (const v of nodes) viewKind(v._type)?.arrange?.(v, ctx);
+  assignPorts(edges, ctx);
   for (const v of edges) viewKind(v._type)?.arrange?.(v, ctx);
 }
 
@@ -36,7 +38,9 @@ export function diagramBounds(diagram: Element): Rect | null {
         .map((p) => p.split(":").map(Number));
       for (const [x, y] of pts) if (Number.isFinite(x) && Number.isFinite(y)) rects.push({ x, y, w: 1, h: 1 });
       for (const l of (v.subViews ?? []) as Element[]) if (l.visible && l.text) rects.push(boundsOf(l));
-    } else rects.push(boundsOf(v));
+      const extra = paintedExtraOf(v);
+      if (extra) rects.push(extra);
+    } else rects.push(paintedBoundsOf(v));
   }
   return union(rects);
 }

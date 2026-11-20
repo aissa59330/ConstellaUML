@@ -1,5 +1,7 @@
 # Constella
 
+*Créé par **Aïssa Ouameur**.*
+
 Modeleur UML desktop pour Linux, inspiré de StarUML (sans son code) : Tauri 2 + TypeScript + Solid.js, rendu de diagrammes maison (Canvas / SVG), format `.mdj` compatible.
 
 - Fonctionnalités et avancement : [FEATURES.md](FEATURES.md)

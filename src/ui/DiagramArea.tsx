@@ -8,7 +8,10 @@ import {
   addFeature,
   deleteFromModel,
   editAttribute,
+  editFlow,
+  editMessage,
   editOperation,
+  editTransition,
   formatAttribute,
   formatOperation,
   moveInParent,
@@ -16,6 +19,7 @@ import {
   setField,
 } from "../notation/uml";
 import type { Rect } from "../render/graphics";
+import { transitionLabel } from "../notation/uml/phase2-views";
 import { setZoomTick, zoomTick } from "./Chrome";
 import { DIAGRAM_CONTEXT_MENU, applyPainter, dropModelOnDiagram, setActiveEditor } from "./commands";
 import { t } from "./i18n";
@@ -51,6 +55,11 @@ function quickEditTarget(view: Element): { text: string; multiline: boolean } | 
     return { text: m.name ?? "", multiline: false };
   }
   if (!model) return null;
+  if (view._type === "UMLTransitionView") return { text: transitionLabel(model), multiline: false };
+  if (view._type === "UMLSeqMessageView") return { text: `${model.guard ? `[${model.guard}] ` : ""}${model.assignmentTarget ? `${model.assignmentTarget} = ` : ""}${model.name ?? ""}${model.arguments ? `(${model.arguments})` : ""}`, multiline: false };
+  if (meta.isKindOf(model._type, "UMLActivityEdge")) return { text: `${model.guard ? `[${model.guard}] ` : ""}${model.name ?? ""}`, multiline: false };
+  if (view._type === "UMLInteractionOperandView") return { text: model.guard ?? "", multiline: false };
+  if (view._type === "UMLStateInvariantView") return { text: model.invariant ?? "", multiline: false };
   if (view._type === "UMLAttributeView") return { text: formatAttribute(model, resolve, { showVisibility: true, showType: true, showMultiplicity: true, showProperty: false, showOperationSignature: true }), multiline: false };
   if (view._type === "UMLOperationView") return { text: formatOperation(model, resolve, { showVisibility: true, showType: true, showMultiplicity: true, showProperty: false, showOperationSignature: true }), multiline: false };
   return { text: nameExpr(model), multiline: false };
@@ -68,6 +77,11 @@ function applyQuickEdit(view: Element, text: string): void {
     return;
   }
   if (!model) return;
+  if (view._type === "UMLTransitionView") return editTransition(repo, model, text);
+  if (view._type === "UMLSeqMessageView") return editMessage(repo, model, text);
+  if (meta.isKindOf(model._type, "UMLActivityEdge")) return editFlow(repo, model, text);
+  if (view._type === "UMLInteractionOperandView") return setField(repo, model, "guard", text.trim());
+  if (view._type === "UMLStateInvariantView") return setField(repo, model, "invariant", text.trim());
   if (view._type === "UMLAttributeView") return editAttribute(repo, model, text);
   if (view._type === "UMLOperationView") return editOperation(repo, model, text);
   if (meta.isKindOf(view._type, "EdgeView")) return setField(repo, model, "name", text.trim());
@@ -293,6 +307,7 @@ export function DiagramArea() {
           <div class="empty-state">
             <img src="/logo.svg" width="72" height="72" alt="" />
             <p>{t("app.name")}</p>
+            <small>Aïssa Ouameur</small>
             <small>Ctrl+N · Ctrl+O · Ctrl+Shift+P</small>
           </div>
         </Show>

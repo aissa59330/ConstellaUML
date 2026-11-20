@@ -144,3 +144,13 @@ Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur 
 - **Routage** : les liens rectilignes et en rectangle arrondi sont routés automatiquement ; les liens obliques et courbes conservent les points intermédiaires de l'utilisateur.
 - **Couleurs** : les nouvelles vues utilisent les variables `$background` / `$foreground` ; à l'ouverture d'un ancien fichier en couleurs fixes, l'utilisateur peut les convertir.
 - **Export** : le SVG passe par le même code de dessin que l'écran (`Graphics`), ce qui garantit un export identique à l'affichage.
+
+## 15. Décisions de la phase 2 (diagrammes UML)
+
+- **Formes déclaratives** (`src/notation/shapes.ts`) : la plupart des vues de nœuds sont décrites par un `NodeSpec` (forme, mot-clé, position du nom, compartiments, tailles min/fixes, `container`) au lieu d'un code de dessin par type. Les vues spécifiques (lifeline, fragment combiné, timing) gardent leur propre `ViewKind`.
+- **Propriétaire du modèle** : `ownerFor()` range chaque nouvel élément dans la bonne liste (activité → `nodes/edges/groups`, interaction → `participants/messages/fragments`, machine à états → région). Créer un diagramme de comportement crée automatiquement son `UMLInteraction` / `UMLActivity` / `UMLStateMachine` (+ région).
+- **Conteneurs** : une vue posée dans un nœud `container` y est imbriquée (`containerView`), se déplace avec lui et suit l'ordre de dessin ; le glisser-déposer peut ré-imbriquer.
+- **Séquence** : les messages ont un routeur dédié (`customRouters`) : seule l'ordonnée compte, les activations sont calculées à partir des messages.
+- **Zone peinte** (`setPaintedBounds`) : ce qui est dessiné hors du rectangle d'une vue (nom sous un acteur, labels de messages de communication) compte pour l'export et « ajuster ».
+- **Ombres SVG** : copie décalée semi-transparente plutôt qu'un filtre `feDropShadow`, que librsvg/LibreOffice n'affichent pas.
+- **Timing** : modèle simplifié (`timingStates`, `timeline` = `état@t; …`), à rendre compatible StarUML plus tard.

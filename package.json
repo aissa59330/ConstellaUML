@@ -23,9 +23,12 @@
     "@types/markdown-it": "^14.2.0",
     "@types/node": "^26.6.6",
     "jsdom": "^29.1.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vite-plugin-solid": "^2.11.17",
     "vitest": "^5.1.1"
-  }
+  },
+  "author": "Aïssa Ouameur",
+  "description": "Constella — modeleur UML desktop pour Linux"
 }

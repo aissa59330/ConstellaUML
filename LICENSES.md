@@ -26,9 +26,14 @@
 | Lucide | icônes d'interface — finalement non utilisé : icônes dessinées pour le projet | ISC | — |
 | Inter, JetBrains Mono | polices | SIL OFL 1.1 | ☐ |
 | Vitest, jsdom | tests | MIT | ☑ |
+| tsx | exécution du script de rendu des démos (`scripts/render-demos.ts`) | MIT | ☑ |
+| librsvg (`rsvg-convert`, outil système, non embarqué) | conversion SVG → PNG des captures de doc | LGPL-2.1+ | ☑ |
 | fast-check, Playwright | tests (à venir) | MIT / Apache-2.0 | ☐ |
 | maxGraph *(repli seulement)* | moteur de graphes | Apache-2.0 | ☐ |
 | Extensions StarUML open source (ex. générateurs) | inspiration et éventuelle réutilisation | à vérifier une par une (souvent MIT) | ☐ |
+
+## Auteur
+- Constella est créé par **Aïssa Ouameur** (© 2026).
 
 ## Ressources propres
 - Logo et icônes Constella : créés pour ce projet (voir `assets/logo/`, `src/ui/icons.tsx`).

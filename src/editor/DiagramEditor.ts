@@ -12,10 +12,13 @@ import {
   createEdge,
   createNode,
   createText,
+  containedViewsOf,
   findTool,
+  setContainer,
   moveViews,
   resizeView,
 } from "../notation/uml";
+import { nodeSpec } from "../notation/shapes";
 import { type RenderCtx, boundsOf, isEdgeView, viewKind } from "../notation/views";
 import { CanvasGraphics, canvasMeasurer } from "../render/canvas";
 import { type Theme, resolveColor } from "../render/colors";
@@ -47,7 +50,7 @@ type Drag =
   | { kind: "rubber"; start: Point; current: Point; additive: boolean }
   | { kind: "pan"; startClient: Point; origScroll: Point }
   | { kind: "create"; tool: NodeTool; start: Point; current: Point }
-  | { kind: "connect"; tool: EdgeTool; source: Element; current: Point }
+  | { kind: "connect"; tool: EdgeTool; source: Element; start: Point; current: Point }
   | { kind: "bend"; edge: Element; index: number; pts: Point[]; key: string }
   | { kind: "reconnect"; edge: Element; end: "head" | "tail"; current: Point }
   | { kind: "label"; label: Element; edge: Element; key: string };
@@ -384,7 +387,7 @@ export class DiagramEditor {
     }
     if (t?.kind === "edge") {
       const src = this.nodeAt(p);
-      if (src) this.drag = { kind: "connect", tool: t, source: src, current: p };
+      if (src) this.drag = { kind: "connect", tool: t, source: src, start: p, current: p };
       return;
     }
     const ep = this.edgePointAt(p);
@@ -533,28 +536,52 @@ export class DiagramEditor {
       } else if (d.kind === "create" && diagram) {
         let r = rectFrom(d.start, { x: this.snap(d.current.x), y: this.snap(d.current.y) });
         if (r.w < 10 || r.h < 10) r = { x: d.start.x, y: d.start.y, w: d.tool.size[0], h: d.tool.size[1] };
-        const view = createNode(this.host.repo, diagram, d.tool, r);
+        const container = this.containerAt({ x: r.x + 1, y: r.y + 1 }, d.tool);
+        const view = createNode(this.host.repo, diagram, d.tool, r, container ?? undefined);
         this.finishTool();
         this.host.select([view]);
         if (d.tool.modelType) this.startQuickEdit(view);
       } else if (d.kind === "connect" && diagram) {
         const target = this.nodeAt(p);
         if (target) {
-          const view = createEdge(this.host.repo, diagram, d.tool, d.source, target);
+          // Sequence messages keep the height where the drag started.
+          const pts = d.tool.viewType === "UMLSeqMessageView" ? `${Math.round(d.start.x)}:${Math.round(d.start.y)};${Math.round(p.x)}:${Math.round(d.start.y)}` : undefined;
+          const view = createEdge(this.host.repo, diagram, d.tool, d.source, target, pts);
           this.finishTool();
           this.host.select([view]);
         }
       } else if (d.kind === "reconnect") {
         const target = this.nodeAt(p, d.edge);
         if (target) this.reconnect(d.edge, d.end, target);
-      } else if (d.kind === "move" && !d.moved) {
-        // plain click: keep selection as set in pointerdown
+      } else if (d.kind === "move" && d.moved && d.views.length === 1 && meta.isKindOf(d.views[0]._type, "NodeView")) {
+        // Dropping a node onto a container nests it (and moving it out un-nests it).
+        const v = d.views[0];
+        const r = boundsOf(v);
+        setContainer(this.host.repo, v, this.containerAt({ x: r.x + r.w / 2, y: r.y + r.h / 2 }, null, v));
       }
     } catch (err) {
       this.host.onError(err);
     }
     this.requestRender();
   };
+
+  /** Top-most view under `p` able to contain a new element of `tool` (or an existing view). */
+  private containerAt(p: Point, tool: NodeTool | null, exclude?: Element): Element | null {
+    const d = this.host.diagram();
+    if (!d) return null;
+    const views = (d.ownedViews ?? []) as Element[];
+    const banned = new Set(exclude ? [exclude, ...containedViewsOf(this.host.repo, exclude)] : []);
+    for (let i = views.length - 1; i >= 0; i--) {
+      const v = views[i];
+      if (banned.has(v) || isEdgeView(v) || v.visible === false || !contains(boundsOf(v), p)) continue;
+      if (CONTAINER_TYPES.has(v._type) || nodeSpec(v._type)?.container) return v;
+      const pinLike = tool && ["inputPin", "outputPin", "expansionNode"].includes(tool.id);
+      if (pinLike && (v._type === "UMLActionView" || v._type === "UMLExpansionRegionView")) return v;
+      const partLike = tool && ["part", "port"].includes(tool.id);
+      if (partLike && (v._type === "UMLClassView" || v._type === "UMLComponentView")) return v;
+    }
+    return null;
+  }
 
   private finishTool(): void {
     if (!this.host.toolSticky()) this.host.setTool(null);
@@ -714,6 +741,8 @@ export class DiagramEditor {
     });
   }
 }
+
+const CONTAINER_TYPES = new Set(["UMLPackageView", "UMLModelView", "UMLSubsystemView", "UMLProfileView"]);
 
 function rectFrom(a: Point, b: Point): Rect {
   return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) };

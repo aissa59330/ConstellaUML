@@ -24,6 +24,13 @@ const KEYWORD: Record<string, string> = {
   UMLSignal: "signal",
   UMLSubsystem: "subsystem",
   UMLModel: "model",
+  UMLProfile: "profile",
+  UMLStereotype: "stereotype",
+  UMLMetaClass: "metaclass",
+  UMLStateMachine: "stateMachine",
+  UMLInteraction: "interaction",
+  UMLActivity: "activity",
+  UMLInformationItem: "information",
 };
 
 interface Line {

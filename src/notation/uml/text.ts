@@ -271,3 +271,81 @@ export function parseOperation(input: string): ParsedOperation {
 export function isValidMultiplicity(m: string): boolean {
   return m === "" || /^(\*|\d+)(\.\.(\*|\d+))?$/.test(m.trim());
 }
+
+// ---- behavior quick-edit grammars --------------------------------------------
+
+export interface ParsedTransition {
+  triggers: string[];
+  guard: string;
+  effects: string[];
+}
+
+/** transition ::= [trigger {',' trigger}] ['[' guard ']'] ['/' effect {';' effect}] */
+/** Index of `ch` outside [] and () (guards may contain "<", ">"…). */
+function indexOutsideBrackets(s: string, ch: string): number {
+  let depth = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === "[" || c === "(") depth++;
+    else if (c === "]" || c === ")") depth--;
+    else if (c === ch && depth === 0) return i;
+  }
+  return -1;
+}
+
+export function parseTransition(input: string): ParsedTransition {
+  let rest = input.trim();
+  let effects: string[] = [];
+  const slash = indexOutsideBrackets(rest, "/");
+  if (slash >= 0) {
+    effects = rest.slice(slash + 1).split(";").map((x) => x.trim()).filter(Boolean);
+    rest = rest.slice(0, slash);
+  }
+  let guard = "";
+  const g = /\[([^\]]*)\]\s*$/.exec(rest.trim());
+  if (g) {
+    guard = g[1].trim();
+    rest = rest.trim().slice(0, g.index);
+  }
+  const triggers = rest.split(",").map((x) => x.trim()).filter(Boolean);
+  return { triggers, guard, effects };
+}
+
+export interface ParsedMessage {
+  guard: string;
+  assignmentTarget: string;
+  name: string;
+  arguments: string;
+}
+
+/** message ::= [seq ':'] ['[' guard ']'] [target '='] name ['(' arguments ')'] */
+export function parseMessage(input: string): ParsedMessage {
+  let rest = input.trim().replace(/^\d+(\.\d+)*\s*:\s*/, "");
+  let guard = "";
+  const g = /^\[([^\]]*)\]\s*/.exec(rest);
+  if (g) {
+    guard = g[1].trim();
+    rest = rest.slice(g[0].length);
+  }
+  let assignmentTarget = "";
+  const eq = indexTop(rest, "=");
+  if (eq >= 0) {
+    assignmentTarget = rest.slice(0, eq).trim();
+    rest = rest.slice(eq + 1).trim();
+  }
+  let args = "";
+  const open = rest.indexOf("(");
+  if (open >= 0) {
+    const close = rest.lastIndexOf(")");
+    if (close < open) throw new ParseError("Parenthèse fermante manquante");
+    args = rest.slice(open + 1, close).trim();
+    rest = rest.slice(0, open);
+  }
+  return { guard, assignmentTarget, name: rest.trim(), arguments: args };
+}
+
+/** flow ::= ['[' guard ']'] [name] */
+export function parseFlow(input: string): { guard: string; name: string } {
+  const m = /^\s*(?:\[([^\]]*)\])?\s*(.*)$/.exec(input) ?? ["", "", ""];
+  return { guard: (m[1] ?? "").trim(), name: (m[2] ?? "").trim() };
+}

@@ -9,7 +9,6 @@ export class SvgGraphics implements Graphics {
   private parts: string[] = [];
   private stack: number[] = [];
   private shadow = false;
-  private usesShadow = false;
 
   constructor(private measurer: TextMeasurer) {}
 
@@ -54,28 +53,29 @@ export class SvgGraphics implements Graphics {
   }
 
   private fillAttrs(fill: string | null): string {
-    const f = !fill || fill === "transparent" ? "none" : esc(fill);
-    let a = ` fill="${f}"`;
-    if (this.shadow && f !== "none") {
-      this.usesShadow = true;
-      a += ' filter="url(#shadow)"';
-    }
-    return a;
+    return ` fill="${!fill || fill === "transparent" ? "none" : esc(fill)}"`;
+  }
+
+  // Drop shadow as an offset translucent copy of the shape: SVG filters are
+  // dropped or mis-rendered by several viewers (librsvg, LibreOffice).
+  private withShadow(fill: string | null, el: (attrs: string) => string): void {
+    if (this.shadow && fill && fill !== "transparent")
+      this.parts.push(`<g transform="translate(2 2)">${el(' fill="#000000" fill-opacity="0.12" stroke="none"')}</g>`);
+    this.parts.push(el(""));
   }
 
   rect(r: Rect, fill: string | null, stroke: StrokeStyle | null, radius = 0): void {
-    this.parts.push(`<rect x="${n(r.x)}" y="${n(r.y)}" width="${n(r.w)}" height="${n(r.h)}"${radius ? ` rx="${n(radius)}"` : ""}${this.fillAttrs(fill)}${this.strokeAttrs(stroke)}/>`);
+    const geo = `x="${n(r.x)}" y="${n(r.y)}" width="${n(r.w)}" height="${n(r.h)}"${radius ? ` rx="${n(radius)}"` : ""}`;
+    this.withShadow(fill, (sh) => `<rect ${geo}${sh || this.fillAttrs(fill) + this.strokeAttrs(stroke)}/>`);
   }
 
   ellipse(r: Rect, fill: string | null, stroke: StrokeStyle | null): void {
-    this.parts.push(`<ellipse cx="${n(r.x + r.w / 2)}" cy="${n(r.y + r.h / 2)}" rx="${n(r.w / 2)}" ry="${n(r.h / 2)}"${this.fillAttrs(fill)}${this.strokeAttrs(stroke)}/>`);
+    const geo = `cx="${n(r.x + r.w / 2)}" cy="${n(r.y + r.h / 2)}" rx="${n(r.w / 2)}" ry="${n(r.h / 2)}"`;
+    this.withShadow(fill, (sh) => `<ellipse ${geo}${sh || this.fillAttrs(fill) + this.strokeAttrs(stroke)}/>`);
   }
 
   polygon(pts: Point[], fill: string | null, stroke: StrokeStyle | null): void {
-    const saved = this.shadow;
-    this.shadow = false;
     this.parts.push(`<polygon points="${pts.map((p) => `${n(p.x)},${n(p.y)}`).join(" ")}"${this.fillAttrs(fill)}${this.strokeAttrs(stroke)}/>`);
-    this.shadow = saved;
   }
 
   polyline(pts: Point[], stroke: StrokeStyle, mode: "straight" | "rounded" | "curve" = "straight"): void {
@@ -104,10 +104,7 @@ export class SvgGraphics implements Graphics {
   toString(width: number, height: number, background: string | null): string {
     while (this.stack.length) this.restore();
     for (; this.base > 0; this.base--) this.parts.push("</g>");
-    const defs = this.usesShadow
-      ? '<defs><filter id="shadow" x="-10%" y="-10%" width="130%" height="130%"><feDropShadow dx="2" dy="2" stdDeviation="2.5" flood-opacity="0.18"/></filter></defs>'
-      : "";
     const bg = background ? `<rect width="100%" height="100%" fill="${esc(background)}"/>` : "";
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${n(width)}" height="${n(height)}" viewBox="0 0 ${n(width)} ${n(height)}">${defs}${bg}${this.parts.join("")}</svg>\n`;
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${n(width)}" height="${n(height)}" viewBox="0 0 ${n(width)} ${n(height)}">${bg}${this.parts.join("")}</svg>\n`;
   }
 }

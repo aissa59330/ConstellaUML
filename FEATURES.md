@@ -7,7 +7,8 @@
 ## État
 
 - **Phase 0** : validée.
-- **Phase 1** (noyau + diagramme de classes) : livrée, en attente de ta validation.
+- **Phase 1** (noyau + diagramme de classes) : validée (vérifiée dans l'app à ta demande).
+- **Phase 2** (tous les autres diagrammes UML) : livrée, en attente de ta validation. Les 14 types sont créables, éditables, sauvegardés en `.mdj` et exportés (tests de rendu par type + images dans [docs/screenshots/diagrams](docs/screenshots/diagrams)). Rien n'est encore marqué `[x]` : il faut ton essai dans l'app native.
 
 ## Sources de la phase 0
 
@@ -165,56 +166,56 @@
 - [ ] CLS-006 Compartiments masquables, affichage abrégé, interface requise/fournie (socket/lollipop) — *partiel* : compartiments masquables, lollipop ; manque socket (interface requise)
 
 ### 5.3 Paquetages (P2)
-- [ ] PKG-001 Package, Model, Subsystem, Containment, Dépendance/Import/Merge
+- [~] PKG-001 Package, Model, Subsystem, Containment, Dépendance/Import/Merge
 
 ### 5.4 Objets (P2)
-- [ ] OBJ-001 Object, Slot, Artifact Instance, Component Instance, Node Instance, Link, Link Object
+- [ ] OBJ-001 Object, Slot, Artifact Instance, Component Instance, Node Instance, Link, Link Object — *partiel* : tout sauf Link Object
 
 ### 5.5 Structure composite (P2)
-- [ ] CMP-001 Collaboration, Port, Part, Connector, Collaboration Use, Role Binding
+- [~] CMP-001 Collaboration, Port, Part, Connector, Collaboration Use, Role Binding
 
 ### 5.6 Composants (P2)
-- [ ] COM-001 Component, Artifact, Component Realization, interfaces fournies/requises, ports
+- [ ] COM-001 Component, Artifact, Component Realization, interfaces fournies/requises, ports — *partiel* : tout sauf l'interface requise (socket)
 
 ### 5.7 Déploiement (P2)
-- [ ] DEP-001 Node, Deployment, Communication Path, instances
+- [~] DEP-001 Node, Deployment, Communication Path, instances
 
 ### 5.8 Cas d'utilisation (P2)
-- [ ] UC-001 Subject (système), Actor, Use Case, Extension Point, Include, Extend, Association, Généralisation
+- [~] UC-001 Subject (système), Actor, Use Case, Extension Point, Include, Extend, Association, Généralisation
 
 ### 5.9 Séquence (P2)
-- [ ] SEQ-001 Lifeline, Message (`messageSort` : synchrone, asynchrone, signal, réponse, création, destruction), numéros de séquence, activations
-- [ ] SEQ-002 Endpoint (messages trouvés/perdus), Gate, State Invariant, Continuation
-- [ ] SEQ-003 Combined Fragment (`alt`, `opt`, `loop`, `par`, `break`, `critical`, `neg`, `assert`, `strict`, `seq`, `ignore`, `consider`) avec opérandes et gardes
-- [ ] SEQ-004 Interaction Use (`ref`)
-- [ ] SEQ-005 Déplacement vertical cohérent des messages, réordonnancement automatique
+- [~] SEQ-001 Lifeline, Message (`messageSort` : synchrone, asynchrone, signal, réponse, création, destruction), numéros de séquence, activations
+- [~] SEQ-002 Endpoint (messages trouvés/perdus), Gate, State Invariant, Continuation
+- [~] SEQ-003 Combined Fragment (`alt`, `opt`, `loop`, `par`, `break`, `critical`, `neg`, `assert`, `strict`, `seq`, `ignore`, `consider`) avec opérandes et gardes
+- [~] SEQ-004 Interaction Use (`ref`)
+- [ ] SEQ-005 Déplacement vertical cohérent des messages, réordonnancement automatique — *partiel* : messages déplaçables verticalement, numérotés selon leur ordre ; pas encore de renumérotation automatique au déplacement
 
 ### 5.10 Communication (P2)
-- [ ] CMU-001 Lifeline, Connector, Message (numérotés, flèches de direction)
+- [~] CMU-001 Lifeline, Connector, Message (numérotés, flèches de direction)
 
 ### 5.11 Timing (P2)
-- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message
+- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message — *partiel* : lifeline avec états et chronologie (`état@t; …`) et axe gradué ; modèle simplifié, pas encore compatible avec le timing de StarUML ; manquent contraintes et messages
 
 ### 5.12 Vue d'ensemble des interactions (P2)
-- [ ] IOV-001 Interaction Use, Interaction inline, Initial, Final, Fork, Join, Merge, Decision, Control Flow
+- [~] IOV-001 Interaction Use, Interaction inline, Initial, Final, Fork, Join, Merge, Decision, Control Flow
 
 ### 5.13 Activités (P2)
-- [ ] ACT-001 Action, Trigger, nœuds initial/final d'activité/final de flux, Fork, Join, Merge, Decision
-- [ ] ACT-002 **Swimlanes** (partitions verticales et horizontales), Interruptible Activity Region, Structured Activity Node
-- [ ] ACT-003 Input/Output Pin, Send Signal, Accept Signal, Accept Time Event, Object Node, Central Buffer, Datastore, Activity Parameter Node
-- [ ] ACT-004 Expansion Region + Input/Output Expansion Node
-- [ ] ACT-005 Control Flow, Object Flow, Exception Handler, Activity Interrupt
+- [~] ACT-001 Action, Trigger, nœuds initial/final d'activité/final de flux, Fork, Join, Merge, Decision
+- [ ] ACT-002 **Swimlanes** (partitions verticales et horizontales), Interruptible Activity Region, Structured Activity Node — *partiel* : partitions verticales seulement
+- [~] ACT-003 Input/Output Pin, Send Signal, Accept Signal, Accept Time Event, Object Node, Central Buffer, Datastore, Activity Parameter Node
+- [~] ACT-004 Expansion Region + Input/Output Expansion Node
+- [~] ACT-005 Control Flow, Object Flow, Exception Handler, Activity Interrupt
 
 ### 5.14 Machine à états (P2)
-- [ ] STM-001 State (simple, composite, orthogonal/régions, sous-machine), Internal Activity (entry/do/exit), Internal Transition
-- [ ] STM-002 Pseudo-états : Initial, Choice, Join, Fork, Junction, Shallow/Deep History, Entry/Exit Point, Terminate ; Final State ; Connection Point Reference
-- [ ] STM-003 Transition (trigger [garde] / effet)
+- [ ] STM-001 State (simple, composite, orthogonal/régions, sous-machine), Internal Activity (entry/do/exit), Internal Transition — *partiel* : états simples et composites (imbrication), entry/do/exit ; manquent régions orthogonales dessinées, sous-machine, transitions internes
+- [~] STM-002 Pseudo-états : Initial, Choice, Join, Fork, Junction, Shallow/Deep History, Entry/Exit Point, Terminate ; Final State ; Connection Point Reference
+- [~] STM-003 Transition (trigger [garde] / effet) — saisie rapide `déclencheur [garde] / effet`
 
 ### 5.15 Profils (P2)
-- [ ] PRF-001 Profile, MetaClass, Stereotype (icône, script d'icône), Extension
+- [ ] PRF-001 Profile, MetaClass, Stereotype (icône, script d'icône), Extension — *partiel* : tout sauf icône et script d'icône du stéréotype
 
 ### 5.16 Flux d'informations (P2)
-- [ ] INF-001 Information Item, Information Flow
+- [~] INF-001 Information Item, Information Flow
 
 ---
 

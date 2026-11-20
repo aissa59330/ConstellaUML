@@ -49,6 +49,20 @@ export function boundsOf(v: Element): Rect {
   return { x: v.left ?? 0, y: v.top ?? 0, w: v.width ?? 0, h: v.height ?? 0 };
 }
 
+// Area painted outside a view's bounds (e.g. an actor's name below it),
+// recorded by arrange() so exports and "fit" include it.
+const outer = new WeakMap<Element, Rect>();
+export function setPaintedBounds(v: Element, r: Rect): void {
+  outer.set(v, r);
+}
+export function paintedBoundsOf(v: Element): Rect {
+  return outer.get(v) ?? boundsOf(v);
+}
+/** Extra painted area recorded for an edge (labels it draws itself). */
+export function paintedExtraOf(v: Element): Rect | undefined {
+  return outer.get(v);
+}
+
 // ---- style helpers --------------------------------------------------------
 
 export function colors(v: Element, ctx: RenderCtx) {

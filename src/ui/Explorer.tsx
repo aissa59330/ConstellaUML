@@ -3,7 +3,7 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import type { Element } from "../core/element";
 import { meta } from "../core/meta/registry";
-import { addDiagram, addModelElement, moveToOwner, renameElement } from "../notation/uml";
+import { DIAGRAM_TYPES, addDiagram, addModelElement, moveToOwner, renameElement } from "../notation/uml";
 import { stereotypeName } from "../notation/uml/text";
 import { type MenuItem, register } from "./commands";
 import { t } from "./i18n";
@@ -11,7 +11,12 @@ import { Icon, iconForType } from "./icons";
 import { ContextMenu } from "./Menu";
 import * as s from "./store";
 
-const CHILD_FIELDS = ["ownedElements", "attributes", "operations", "receptions", "literals", "parameters", "templateParameters", "tags"];
+const CHILD_FIELDS = [
+  "ownedElements", "attributes", "operations", "receptions", "literals", "parameters", "templateParameters",
+  "participants", "messages", "fragments", "operands", "nodes", "edges", "groups", "subpartitions", "inputs", "outputs",
+  "regions", "vertices", "transitions", "connections", "triggers", "effects", "entryActivities", "doActivities", "exitActivities",
+  "extensionPoints", "slots", "tags",
+];
 
 function childrenOf(el: Element): Element[] {
   const out: Element[] = [];
@@ -29,10 +34,22 @@ function label(el: Element, showSt: boolean): string {
 }
 
 const ADDABLE: [string, string[]][] = [
-  ["Project", ["UMLModel", "UMLPackage"]],
-  ["UMLPackage", ["UMLPackage", "UMLModel", "UMLSubsystem", "UMLClass", "UMLInterface", "UMLEnumeration", "UMLDataType", "UMLPrimitiveType", "UMLSignal", "UMLConstraint"]],
+  ["Project", ["UMLModel", "UMLPackage", "UMLProfile"]],
+  [
+    "UMLPackage",
+    ["UMLPackage", "UMLModel", "UMLSubsystem", "UMLClass", "UMLInterface", "UMLEnumeration", "UMLDataType", "UMLPrimitiveType", "UMLSignal", "UMLActor", "UMLUseCase", "UMLComponent", "UMLArtifact", "UMLNode", "UMLObject", "UMLCollaboration", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLInformationItem", "UMLStereotype", "UMLConstraint"],
+  ],
   ["UMLEnumeration", ["UMLEnumerationLiteral", "UMLAttribute", "UMLOperation", "UMLConstraint"]],
-  ["UMLClassifier", ["UMLAttribute", "UMLOperation", "UMLReception", "UMLTemplateParameter", "UMLClass", "UMLConstraint"]],
+  ["UMLInteraction", ["UMLLifeline", "UMLMessage", "UMLCombinedFragment", "UMLInteractionUse", "UMLStateInvariant"]],
+  ["UMLActivity", ["UMLAction", "UMLObjectNode", "UMLActivityPartition"]],
+  ["UMLStateMachine", ["UMLRegion"]],
+  ["UMLUseCase", ["UMLExtensionPoint", "UMLAttribute", "UMLOperation"]],
+  ["UMLClassifier", ["UMLAttribute", "UMLOperation", "UMLReception", "UMLTemplateParameter", "UMLPort", "UMLClass", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLConstraint"]],
+  ["UMLRegion", ["UMLState", "UMLPseudostate", "UMLFinalState"]],
+  ["UMLState", ["UMLRegion"]],
+  ["UMLCombinedFragment", ["UMLInteractionOperand"]],
+  ["UMLInstance", ["UMLSlot"]],
+  ["UMLAction", ["UMLInputPin", "UMLOutputPin"]],
   ["UMLOperation", ["UMLParameter"]],
 ];
 
@@ -140,18 +157,25 @@ export function Explorer() {
       });
     }
     if (meta.containerField(el._type, "UMLClassDiagram") || el._type === "Project") {
-      register({
-        id: "explorer:add-class-diagram",
-        label: "cmd.model.addClassDiagram",
-        run: () => {
-          const target = s.selection()[0] ?? s.repo.root!;
-          const d = addDiagram(s.repo, target);
-          setOpen(target._id, true);
-          s.select(d);
-          s.openDiagram(d._id);
-        },
+      regs.push({
+        label: "cmd.model.addDiagram",
+        children: DIAGRAM_TYPES.map(({ type }) => {
+          const id = `explorer:add-diagram-${type}`;
+          register({
+            id,
+            label: `diagram.${type}`,
+            run: () => {
+              const target = s.selection()[0] ?? s.repo.root!;
+              const d = addDiagram(s.repo, target, type);
+              setOpen(target._id, true);
+              revealInExplorer(d);
+              s.select(d);
+              s.openDiagram(d._id);
+            },
+          });
+          return { cmd: id };
+        }),
       });
-      regs.push({ label: "cmd.model.addDiagram", children: [{ cmd: "explorer:add-class-diagram" }] });
     }
     register({ id: "explorer:rename", label: "explorer.rename", run: () => setRenaming(s.selection()[0]?._id ?? null) });
     return [

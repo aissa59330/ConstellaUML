@@ -71,6 +71,88 @@ const P: Record<string, () => JSX.Element> = {
       <path d="M10 8v2M8.5 12v-2h3v2" />
     </>
   ),
+  actor: () => <path d="M8 5.5a1.8 1.8 0 100-3.6 1.8 1.8 0 000 3.6zM8 5.5v4.5M4.5 7.5h7M5 14l3-4 3 4" />,
+  useCase: () => <ellipse cx="8" cy="8" rx="6.5" ry="4" />,
+  subject: () => <rect x="2" y="2" width="12" height="12" />,
+  include: () => <path d="M2 14L14 2M9 2h5v5" stroke-dasharray="2 1.5" />,
+  extend: () => <path d="M14 2L2 14M7 14H2V9" stroke-dasharray="2 1.5" />,
+  component: () => (
+    <>
+      <rect x="3" y="2.5" width="11" height="11" />
+      <path d="M1.5 5.5h3v2h-3zM1.5 9h3v2h-3z" />
+    </>
+  ),
+  node: () => <path d="M2 5l2.5-2.5H14V11l-2.5 2.5H2zM2 5h9.5v8.5M11.5 5L14 2.5" />,
+  nodeInstance: () => <path d="M2 5l2.5-2.5H14V11l-2.5 2.5H2zM2 5h9.5v8.5M11.5 5L14 2.5" />,
+  artifact: () => <path d="M3.5 2h6l3 3v9h-9zM9.5 2v3h3" />,
+  lifeline: () => (
+    <>
+      <rect x="3" y="1.5" width="10" height="4.5" />
+      <path d="M8 6v8.5" stroke-dasharray="1.5 1.5" />
+    </>
+  ),
+  syncMessage: () => <path d="M2 8h10M10 5.5L13.5 8 10 10.5z" />,
+  asyncMessage: () => <path d="M2 8h11M10 5l3.5 3L10 11" />,
+  replyMessage: () => <path d="M14 8H3M6 5L2.5 8 6 11" stroke-dasharray="2 1.5" />,
+  createMessage: () => <path d="M2 8h11M10 5l3.5 3L10 11" stroke-dasharray="2 1.5" />,
+  deleteMessage: () => <path d="M2 8h8M10.5 5.5l4 5M14.5 5.5l-4 5" />,
+  combinedFragment: () => <path d="M2 2h12v12H2zM2 6h5l1-1V2M2 10h12" />,
+  interactionUse: () => <path d="M2 4h12v8H2zM2 7h4l1-1V4" />,
+  action: () => <rect x="1.5" y="4" width="13" height="8" rx="3" />,
+  initial: () => <circle cx="8" cy="8" r="4" fill="currentColor" />,
+  initialState: () => <circle cx="8" cy="8" r="4" fill="currentColor" />,
+  activityFinal: () => (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <circle cx="8" cy="8" r="3" fill="currentColor" />
+    </>
+  ),
+  finalState: () => (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <circle cx="8" cy="8" r="3" fill="currentColor" />
+    </>
+  ),
+  flowFinal: () => <path d="M8 13.5A5.5 5.5 0 108 2.5a5.5 5.5 0 000 11zM4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" />,
+  fork: () => <path d="M2 7.5h12v1.5H2z" fill="currentColor" />,
+  join: () => <path d="M2 7.5h12v1.5H2z" fill="currentColor" />,
+  forkState: () => <path d="M2 7.5h12v1.5H2z" fill="currentColor" />,
+  joinState: () => <path d="M2 7.5h12v1.5H2z" fill="currentColor" />,
+  decision: () => <path d="M8 2l6 6-6 6-6-6z" />,
+  mergeNode: () => <path d="M8 2l6 6-6 6-6-6z" />,
+  choice: () => <path d="M8 2l6 6-6 6-6-6z" />,
+  junction: () => <circle cx="8" cy="8" r="2.5" fill="currentColor" />,
+  swimlane: () => <path d="M2 2h12v12H2zM2 5h12M8 2v12" />,
+  controlFlow: () => <path d="M2 8h11M10 5l3.5 3L10 11" />,
+  objectFlow: () => <path d="M2 8h11M10 5l3.5 3L10 11" />,
+  transition: () => <path d="M2 12c3-7 8-7 11-3M10.5 7.5L13 9l-.5-3" />,
+  state: () => <rect x="1.5" y="3.5" width="13" height="9" rx="3" />,
+  objectNode: () => <rect x="2" y="4" width="12" height="8" />,
+  object: () => (
+    <>
+      <rect x="2" y="3" width="12" height="10" />
+      <path d="M5 7h6" />
+    </>
+  ),
+  stereotype: () => (
+    <>
+      <rect x="2" y="2.5" width="12" height="11" />
+      <path d="M5 5.5l-1.5 1.5L5 8.5M11 5.5l1.5 1.5L11 8.5" />
+    </>
+  ),
+  profile: () => (
+    <>
+      <path d="M2 5V3h5v2" />
+      <rect x="2" y="5" width="12" height="9" rx="0.5" />
+    </>
+  ),
+  extension: () => <path d="M2 14l7.5-7.5M7 4l6-1-1 6z" fill="currentColor" />,
+  timingLifeline: () => <path d="M1.5 12h3V5h5v7h5" />,
+  port: () => <rect x="5" y="5" width="6" height="6" />,
+  connector: () => <path d="M2 14L14 2" />,
+  link: () => <path d="M2 14L14 2" />,
+  commLifeline: () => <rect x="2" y="4" width="12" height="8" />,
+  commMessage: () => <path d="M2 11L12 3M2 6h7M7 3.5L9.5 6 7 8.5" />,
   text: () => <path d="M3 4V3h10v1M8 3v10M6 13h4" />,
   note: () => (
     <>
@@ -159,7 +241,6 @@ export function iconForType(type: string): string {
     UMLModel: "model",
     UMLPackage: "package",
     UMLSubsystem: "subsystem",
-    UMLProfile: "package",
     UMLClass: "class",
     UMLInterface: "interface",
     UMLSignal: "signal",
@@ -179,6 +260,25 @@ export function iconForType(type: string): string {
     UMLInterfaceRealization: "interfaceRealization",
     UMLConstraint: "constraint",
     Tag: "tag",
+    UMLActor: "actor",
+    UMLUseCase: "useCase",
+    UMLUseCaseSubject: "subject",
+    UMLComponent: "component",
+    UMLNode: "node",
+    UMLArtifact: "artifact",
+    UMLLifeline: "lifeline",
+    UMLMessage: "syncMessage",
+    UMLInteraction: "combinedFragment",
+    UMLCombinedFragment: "combinedFragment",
+    UMLActivity: "action",
+    UMLAction: "action",
+    UMLStateMachine: "state",
+    UMLState: "state",
+    UMLTransition: "transition",
+    UMLControlFlow: "controlFlow",
+    UMLObject: "object",
+    UMLStereotype: "stereotype",
+    UMLProfile: "profile",
   };
   if (map[type]) return map[type];
   if (type.endsWith("Diagram")) return "diagram";

@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { NOTATION_LABELS } from "../notation/uml/toolbox";
 
 export type Lang = "fr" | "en";
 
@@ -203,7 +204,7 @@ const fr = {
   "toast.copied": "Copié",
   "toast.error": "Erreur : {msg}",
   "toast.clipboardUnsupported": "Le presse-papiers d'images n'est pas disponible ici ; utilisez Exporter l'image.",
-  "about.text": "Constella {version} — modeleur UML libre pour Linux.\nInspiré de StarUML, sans son code.",
+  "about.text": "Constella {version} — modeleur UML pour Linux.\nCréé par Aïssa Ouameur.\nInspiré de StarUML, sans son code.",
   "quickedit.hint": "Entrée : valider · Échap : annuler · Ctrl+Entrée : ajouter un attribut · Ctrl+Maj+Entrée : ajouter une opération",
 };
 
@@ -410,11 +411,16 @@ const en: Record<I18nKey, string> = {
   "toast.copied": "Copied",
   "toast.error": "Error: {msg}",
   "toast.clipboardUnsupported": "Image clipboard is not available here; use Export Image.",
-  "about.text": "Constella {version} — free UML modeler for Linux.\nInspired by StarUML, without its code.",
+  "about.text": "Constella {version} — UML modeler for Linux.\nCreated by Aïssa Ouameur.\nInspired by StarUML, without its code.",
   "quickedit.hint": "Enter: apply · Esc: cancel · Ctrl+Enter: add attribute · Ctrl+Shift+Enter: add operation",
 };
 
-const dicts: Record<Lang, Record<I18nKey, string>> = { fr, en };
+const dicts: Record<Lang, Record<string, string>> = { fr: { ...fr }, en: { ...en } };
+// Toolbox, tool and diagram-type labels come with the notations.
+for (const [key, [frLabel, enLabel]] of Object.entries(NOTATION_LABELS)) {
+  dicts.fr[key] ??= frLabel;
+  dicts.en[key] ??= enLabel;
+}
 
 function initialLang(): Lang {
   try {
@@ -441,7 +447,7 @@ export function setLang(l: Lang): void {
 
 /** Translates `key`, filling `{name}` placeholders. Reactive (reads `lang`). */
 export function t(key: string, vars?: Record<string, string | number>): string {
-  let s = (dicts[lang()] as Record<string, string>)[key] ?? key;
+  let s = dicts[lang()][key] ?? key;
   if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
   return s;
 }
