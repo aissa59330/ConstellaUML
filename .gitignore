@@ -6,3 +6,5 @@ src-tauri/target/
 *.deb
 *.rpm
 *.pkg.tar.zst
+# Paquets publiés volontairement dans le dépôt
+!paquets/**
