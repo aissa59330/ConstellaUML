@@ -1,0 +1,28 @@
+# Maintainer: Aïssa Ouameur
+# Repackages the .deb built by `npx tauri build` for Arch Linux.
+# Usage: put Constella_0.1.0_amd64.deb next to this file, then `makepkg -si`.
+pkgname=constella-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Modeleur UML pour Linux (diagrammes UML, entité-relation, génération de code)"
+arch=('x86_64')
+license=('custom')
+depends=('webkit2gtk-4.1' 'gtk3')
+provides=('constella')
+conflicts=('constella')
+source=("Constella_${pkgver}_amd64.deb")
+sha256sums=('SKIP')
+
+package() {
+  bsdtar -xf data.tar.* -C "$pkgdir"
+  # Opening .mdj files with Constella.
+  install -Dm644 /dev/stdin "$pkgdir/usr/share/mime/packages/constella.xml" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-constella-mdj">
+    <comment>Projet UML (Constella / StarUML)</comment>
+    <glob pattern="*.mdj"/>
+  </mime-type>
+</mime-info>
+XML
+}
