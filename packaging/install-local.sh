@@ -65,6 +65,8 @@ if [[ -n "${CONTAINER_ID:-}" && -e /run/.containerenv ]]; then
   EXEC="/usr/bin/distrobox-enter -n $CONTAINER_ID -- $BIN_DIR/constella"
 fi
 
+# Absolute icon path: some launchers (and the host side of a distrobox) do not
+# look up icon names in ~/.local/share/icons.
 install -Dm644 /dev/stdin "$DESKTOP" <<DESKTOP
 [Desktop Entry]
 Type=Application
@@ -72,7 +74,7 @@ Name=$NAME
 GenericName=Modeleur UML
 Comment=Diagrammes UML, entité-relation, génération de code — créé par Aïssa Ouameur
 Exec=$EXEC %f
-Icon=constella
+Icon=$ICON_DIR/512x512/apps/constella.png
 Terminal=false
 Categories=Development;Graphics;Education;
 Keywords=UML;diagramme;modélisation;StarUML;ERD;SQL;
