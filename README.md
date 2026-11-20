@@ -2,7 +2,7 @@
 
 *Créé par **Aïssa Ouameur**.*
 
-Modeleur UML pour Linux, inspiré de l'ergonomie de StarUML (sans son code) : Tauri 2 + TypeScript + Solid.js, rendu de diagrammes maison (Canvas / SVG), fichiers `.mdj` compatibles.
+Modeleur UML pour Linux, inspiré de l'ergonomie de StarUML (sans son code) : Tauri 2 + TypeScript + Solid.js, rendu de diagrammes maison (Canvas / SVG), fichiers `.mdj` compatibles!
 
 ![Modèle relationnel](docs/screenshots/phase3-modele-relationnel.jpg)
 
