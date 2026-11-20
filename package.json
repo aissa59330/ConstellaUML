@@ -30,5 +30,6 @@
     "vitest": "^5.1.1"
   },
   "author": "Aïssa Ouameur",
+  "license": "GPL-3.0-or-later",
   "description": "Constella — modeleur UML desktop pour Linux"
 }

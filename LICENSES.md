@@ -34,7 +34,7 @@
 | Extensions StarUML open source (ex. générateurs) | inspiration et éventuelle réutilisation | à vérifier une par une (souvent MIT) | ☐ |
 
 ## Auteur
-- Constella est créé par **Aïssa Ouameur** (© 2026).
+- Constella est créé par **Aïssa Ouameur** (© 2026) et distribué sous **GPL-3.0 ou ultérieure** (fichier `LICENSE`). Toutes les dépendances ci-dessus (MIT, Apache-2.0, ISC, LGPL, SIL OFL) sont compatibles avec la GPL-3.0.
 
 ## Ressources propres
 - Logo et icônes Constella : créés pour ce projet (voir `assets/logo/`, `src/ui/icons.tsx`).

@@ -34,4 +34,8 @@ packaging/install-local.sh   # installe la version compilée dans ~/.local (menu
 
 ## Licence
 
-© 2026 Aïssa Ouameur — tous droits réservés (voir [LICENSE](LICENSE)). Les bibliothèques tierces gardent leur propre licence ([LICENSES.md](LICENSES.md)).
+Copyright © 2026 Aïssa Ouameur.
+
+Constella est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la **GNU General Public License** publiée par la Free Software Foundation, version 3 ou (à votre choix) toute version ultérieure. Il est distribué dans l'espoir d'être utile, mais **sans aucune garantie**. Texte complet : [LICENSE](LICENSE).
+
+Les bibliothèques tierces gardent leur propre licence, toutes compatibles avec la GPL-3.0 ([LICENSES.md](LICENSES.md)).
