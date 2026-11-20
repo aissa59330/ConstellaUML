@@ -2,3 +2,7 @@ node_modules/
 dist/
 src-tauri/target/
 *-workspace/
+*.AppImage
+*.deb
+*.rpm
+*.pkg.tar.zst

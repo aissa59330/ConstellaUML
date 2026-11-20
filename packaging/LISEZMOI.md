@@ -1,7 +1,7 @@
 # Installer Constella
 
 Paquets produits par `npx tauri build` dans `src-tauri/target/release/bundle/`.
-Ils demandent une distribution récente (glibc 2.36 ou plus : Ubuntu 24.04+, Debian 12+, Arch, Fedora 38+).
+Les paquets publiés sur GitHub sont compilés sur Ubuntu 22.04 : ils fonctionnent sur **Ubuntu 22.04 et plus récent**, Debian 12, Arch, Fedora 36+. (Compilés sur Debian 12, comme sur ma machine, ils demandent Ubuntu 24.04 ou plus.)
 
 ## Ubuntu / Debian — `Constella_0.1.0_amd64.deb`
 
