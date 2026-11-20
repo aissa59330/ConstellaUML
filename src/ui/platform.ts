@@ -129,3 +129,58 @@ export async function quit(): Promise<void> {
 export function basename(path: string): string {
   return path.split(/[\\/]/).pop() ?? path;
 }
+
+export interface SourceFile {
+  path: string;
+  content: string;
+}
+
+/**
+ * Lets the user pick a source folder and returns its files with one of
+ * `extensions` (paths relative to the folder), or null if cancelled.
+ */
+export async function pickSourceFiles(extensions: string[]): Promise<{ folder: string; files: SourceFile[] } | null> {
+  if (isTauri) {
+    const folder = await pickFolder();
+    if (!folder) return null;
+    return { folder, files: await invoke<SourceFile[]>("read_source_tree", { root: folder, extensions }) };
+  }
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.setAttribute("webkitdirectory", "");
+    input.onchange = async () => {
+      const picked = [...(input.files ?? [])].filter((f) => extensions.some((x) => f.name.endsWith(x)) && !/(^|\/)(node_modules|\.git|vendor|dist|build)\//.test(f.webkitRelativePath));
+      if (!picked.length) return resolve(null);
+      // Drop the top folder from "folder/a/B.java".
+      const files = await Promise.all(picked.map(async (f) => ({ path: f.webkitRelativePath.split("/").slice(1).join("/") || f.name, content: await f.text() })));
+      resolve({ folder: picked[0].webkitRelativePath.split("/")[0], files });
+    };
+    input.click();
+  });
+}
+
+/** Writes generated files under a folder the user picks; in a browser, downloads them as a .zip. */
+export async function saveGeneratedFiles(files: SourceFile[], zip: () => Uint8Array, zipName: string): Promise<string | null> {
+  if (isTauri) {
+    const folder = await pickFolder();
+    if (!folder) return null;
+    await invoke<number>("write_files", { root: folder, files });
+    return folder;
+  }
+  download(zipName, zip() as BlobPart, "application/zip");
+  return zipName;
+}
+
+/** Saves one text file (SQL script…) where the user chooses. */
+export async function saveTextAs(defaultName: string, contents: string, filters: FileFilter[]): Promise<string | null> {
+  if (isTauri) {
+    const p = await pickSavePath(defaultName, filters);
+    if (!p) return null;
+    await writeText(p, contents);
+    return p;
+  }
+  download(defaultName, contents, "text/plain");
+  return defaultName;
+}

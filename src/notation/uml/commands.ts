@@ -5,7 +5,9 @@ import { meta } from "../../core/meta/registry";
 import type { Repository, Transaction } from "../../core/repository";
 import { formatPoints, parsePoints } from "../edges";
 import type { Rect } from "../../render/graphics";
-import { type EdgeTool, type NodeTool, VIEW_FOR_MODEL } from "./toolbox";
+import { type EdgeTool, type NodeTool, viewTypeFor } from "./toolbox";
+import { RA_OPERATORS, RA_SYMBOLS } from "../../core/meta/ra.meta";
+import { formatColumn, parseColumn } from "../erd/text";
 import { ParseError, parseAttribute, parseFlow, parseMessage, parseName, parseOperation, parseTransition } from "./text";
 
 export class CommandError extends Error {}
@@ -159,6 +161,15 @@ export function canConnect(repo: Repository, tool: EdgeTool, tail: Element, head
       return tm._type === "UMLLifeline" && hm._type === "UMLLifeline" ? null : "Un message relie deux lignes de vie.";
     case "extension":
       return tm._type === "UMLStereotype" && hm._type === "UMLMetaClass" ? null : "Une extension va d'un stéréotype vers une métaclasse.";
+    case "relOneToOne":
+    case "relOneToMany":
+    case "relManyToMany":
+    case "relIdentifying":
+      return tm._type === "ERDEntity" && hm._type === "ERDEntity" ? null : "Une relation relie deux entités.";
+    case "flow":
+      return tm._type.startsWith("RA") && hm._type.startsWith("RA") && tm !== hm ? null : "Un flux relie deux nœuds de l'arbre.";
+    case "foreignKey":
+      return tm._type === "ERDEntity" && hm._type === "ERDEntity" ? null : "Une clé étrangère va d'une table vers la table référencée.";
     default:
       return null;
   }
@@ -180,6 +191,20 @@ export function createEdge(repo: Repository, diagram: Element, tool: EdgeTool, t
       const field = dedicated ? nsField : "ownedElements";
       if (tool.modelType === "UMLMessage") {
         model = create("UMLMessage", { name: tool.variant === "reply" ? "" : uniqueName("message", owner.messages), messageSort: tool.variant ?? "synchCall", source: ref(tm), target: ref(hm) });
+        tx.insert(owner, field, model);
+      } else if (tool.modelType === "ERDRelationship" && tool.variant === "fk") {
+        // Foreign key drawn from the referencing table (tail) to the referenced one (head).
+        model = create("ERDRelationship", { name: "" });
+        model.end1 = create("ERDRelationshipEnd", { reference: ref(hm), cardinality: "1", _parent: ref(model) });
+        model.end2 = create("ERDRelationshipEnd", { reference: ref(tm), cardinality: "0..*", _parent: ref(model) });
+        tx.insert(hm, "ownedElements", model);
+        addForeignKeyColumns(tx, tm, hm);
+      } else if (tool.modelType === "ERDRelationship") {
+        // variant "card1:card2[:identifying]" — end1 is the source (parent) entity.
+        const [c1, c2, flag] = (tool.variant ?? "1:0..*").split(":");
+        model = create("ERDRelationship", { name: "", identifying: flag === "identifying" });
+        model.end1 = create("ERDRelationshipEnd", { reference: ref(tm), cardinality: c1, _parent: ref(model) });
+        model.end2 = create("ERDRelationshipEnd", { reference: ref(hm), cardinality: c2, _parent: ref(model) });
         tx.insert(owner, field, model);
       } else if (["UMLAssociation", "UMLCommunicationPath", "UMLConnector", "UMLLink"].includes(tool.modelType)) {
         model = create(tool.modelType);
@@ -218,6 +243,22 @@ export function createEdge(repo: Repository, diagram: Element, tool: EdgeTool, t
   });
 }
 
+/**
+ * Gives `child` a column referencing each primary-key column of `parent`
+ * (same name and type, marked FK), unless it already references `parent`.
+ */
+function addForeignKeyColumns(tx: Transaction, child: Element, parent: Element): void {
+  const cols = (child.columns ?? []) as Element[];
+  const pks = ((parent.columns ?? []) as Element[]).filter((c) => c.primaryKey);
+  const refersToParent = (c: Element) => pks.some((pk) => c.referenceTo?.$ref === pk._id);
+  if (cols.some(refersToParent)) return;
+  for (const pk of pks) {
+    let name = pk.name ?? "id";
+    if (cols.some((c) => c.name === name)) name = `${name}_${parent.name ?? "ref"}`;
+    tx.insert(child, "columns", create("ERDColumn", { name, type: pk.type, length: pk.length, foreignKey: true, referenceTo: ref(pk) }));
+  }
+}
+
 /** Communication message: reuses (or creates) the connector between two lifelines. */
 function createCommMessage(repo: Repository, tx: Transaction, diagram: Element, tool: EdgeTool, tail: Element, head: Element): Element {
   const tm = repo.deref(tail.model)!, hm = repo.deref(head.model)!;
@@ -238,12 +279,21 @@ function createCommMessage(repo: Repository, tx: Transaction, diagram: Element, 
   return connView;
 }
 
+/** Model elements at the tail and head of a relationship's view (FK arrows point to the referenced table). */
+export function edgeEndRefs(rel: Element, viewType: string): [{ $ref: string } | undefined, { $ref: string } | undefined] {
+  if (rel.end1) {
+    const ends: [any, any] = [rel.end1?.reference, rel.end2?.reference];
+    return viewType === "ERDForeignKeyView" ? [ends[1], ends[0]] : ends;
+  }
+  return [rel.source, rel.target];
+}
+
 /** Creates a view of an existing model element (drag from the explorer). */
 export function addViewOfModel(repo: Repository, diagram: Element, model: Element, x: number, y: number): Element | null {
-  const viewType = VIEW_FOR_MODEL[model._type];
+  const viewType = viewTypeFor(diagram, model._type);
   if (!viewType) return null;
   if (meta.isKindOf(viewType, "EdgeView")) {
-    const [a, b] = model._type === "UMLAssociation" ? [model.end1?.reference, model.end2?.reference] : [model.source, model.target];
+    const [a, b] = edgeEndRefs(model, viewType);
     const views: Element[] = diagram.ownedViews ?? [];
     const tail = views.find((v) => v.model?.$ref === a?.$ref && !meta.isKindOf(v._type, "EdgeView"));
     const head = views.find((v) => v.model?.$ref === b?.$ref && !meta.isKindOf(v._type, "EdgeView"));
@@ -255,10 +305,10 @@ export function addViewOfModel(repo: Repository, diagram: Element, model: Elemen
     tx.insert(diagram, "ownedViews", view);
     // Also show existing relationships to elements already in the diagram.
     for (const rel of repo.relationshipsOf(model._id)) {
-      const relViewType = VIEW_FOR_MODEL[rel._type];
+      const relViewType = viewTypeFor(diagram, rel._type);
       if (!relViewType || (diagram.ownedViews as Element[]).some((v) => v.model?.$ref === rel._id)) continue;
-      const [a, b] = rel._type === "UMLAssociation" ? [rel.end1?.reference?.$ref, rel.end2?.reference?.$ref] : [rel.source?.$ref, rel.target?.$ref];
-      const find = (id: string) => (diagram.ownedViews as Element[]).find((v) => v.model?.$ref === id && !meta.isKindOf(v._type, "EdgeView"));
+      const [a, b] = edgeEndRefs(rel, relViewType).map((r) => r?.$ref);
+      const find = (id?: string) => (id ? (diagram.ownedViews as Element[]).find((v) => v.model?.$ref === id && !meta.isKindOf(v._type, "EdgeView")) : undefined);
       const tail = find(a), head = find(b);
       if (tail && head) tx.insert(diagram, "ownedViews", create(relViewType, { model: ref(rel), tail: ref(tail), head: ref(head), lineStyle: 0 }));
     }
@@ -481,7 +531,7 @@ export function addModelElement(repo: Repository, owner: Element, type: string):
   const field = meta.containerField(owner._type, type) ?? (meta.isKindOf(type, "Diagram") ? "ownedElements" : undefined);
   if (!field) throw new CommandError(`${owner.name ?? owner._type} ne peut pas contenir ${type}.`);
   return repo.transact(`Add ${type}`, (tx) => {
-    const base = type.replace(/^UML/, "");
+    const base = type.replace(/^(UML|ERD)/, "");
     return tx.insert(owner, field, create(type, { name: uniqueName(base, owner[field]) }));
   });
 }
@@ -493,6 +543,9 @@ const BEHAVIOR_FOR: Record<string, string> = {
   UMLInteractionOverviewDiagram: "UMLActivity",
   UMLActivityDiagram: "UMLActivity",
   UMLStatechartDiagram: "UMLStateMachine",
+  ERDDiagram: "ERDDataModel",
+  ERDRelationalDiagram: "ERDDataModel",
+  RAQueryDiagram: "RAQuery",
 };
 
 /**
@@ -505,10 +558,10 @@ export function addDiagram(repo: Repository, owner: Element, type = "UMLClassDia
     const behavior = BEHAVIOR_FOR[type];
     if (behavior && owner._type !== behavior) {
       const field = meta.containerField(owner._type, behavior) ?? "ownedElements";
-      target = tx.insert(owner, field, create(behavior, { name: uniqueName(behavior.replace(/^UML/, ""), owner[field]) }));
+      target = tx.insert(owner, field, create(behavior, { name: uniqueName(behavior.replace(/^(UML|ERD|RA)/, ""), owner[field]) }));
       if (behavior === "UMLStateMachine") tx.insert(target, "regions", create("UMLRegion"));
     }
-    const base = type.replace(/^UML/, "");
+    const base = type.replace(/^(UML|ERD)/, "");
     return tx.insert(target, "ownedElements", create(type, { name: uniqueName(base, target.ownedElements) }));
   });
 }
@@ -633,4 +686,85 @@ export function pasteModel(repo: Repository, owner: Element, clip: ModelClipboar
   delete copy._parent;
   for (const e of walk(copy)) for (const k in e) if (isElement(e[k])) e[k]._parent = ref(e);
   return repo.transact("Paste", (tx) => tx.insert(owner, field, copy));
+}
+
+// ---- ERD ⇄ relational model -------------------------------------------------
+
+/**
+ * Creates a diagram of `targetType` next to `source` showing the same entities
+ * and relationships in the other notation (ER diagram ⇄ relational model), at
+ * the same positions.
+ */
+export function convertDiagram(repo: Repository, source: Element, targetType: "ERDDiagram" | "ERDRelationalDiagram"): Element {
+  const owner = repo.parentOf(source) ?? repo.root!;
+  return repo.transact("Convert diagram", (tx) => {
+    const base = targetType === "ERDRelationalDiagram" ? "Relational" : "ERD";
+    const target = tx.insert(owner, "ownedElements", create(targetType, { name: `${source.name ?? base} (${targetType === "ERDRelationalDiagram" ? "MLD" : "MCD"})` }));
+    const byModel = new Map<string, Element>();
+    for (const v of (source.ownedViews ?? []) as Element[]) {
+      const m = repo.deref(v.model);
+      if (m?._type !== "ERDEntity") continue;
+      const view = create(viewTypeFor(target, "ERDEntity")!, { model: ref(m), left: v.left, top: v.top, width: 40, height: 20 });
+      tx.insert(target, "ownedViews", view);
+      byModel.set(m._id, view);
+    }
+    const seen = new Set<string>();
+    for (const m of byModel.keys()) {
+      for (const rel of repo.relationshipsOf(m)) {
+        if (rel._type !== "ERDRelationship" || seen.has(rel._id)) continue;
+        seen.add(rel._id);
+        const viewType = viewTypeFor(target, "ERDRelationship")!;
+        const [a, b] = edgeEndRefs(rel, viewType);
+        const tail = a && byModel.get(a.$ref), head = b && byModel.get(b.$ref);
+        if (tail && head) tx.insert(target, "ownedViews", create(viewType, { model: ref(rel), tail: ref(tail), head: ref(head), lineStyle: targetType === "ERDRelationalDiagram" ? 1 : 0 }));
+      }
+    }
+    return target;
+  });
+}
+
+// ---- ERD / query tree quick-edit ------------------------------------------------
+
+/** Entity as text: first line the name, then one column per line (`id: INT PK`). */
+export function entityText(entity: Element): string {
+  return [entity.name ?? "", ...((entity.columns ?? []) as Element[]).map(formatColumn)].join("\n");
+}
+
+/** Applies `entityText` back: renames, updates columns in order, adds or removes the rest. */
+export function editEntity(repo: Repository, entity: Element, text: string): void {
+  const [name = "", ...lines] = text.split(/\r?\n/).map((l) => l.trim());
+  const parsed = lines.filter(Boolean).map(parseColumn);
+  repo.transact("Edit entity", (tx) => {
+    if (name && name !== entity.name) tx.set(entity, "name", name);
+    const cols = [...((entity.columns ?? []) as Element[])];
+    parsed.forEach((p, i) => {
+      const values = { name: p.name, type: p.type ?? "VARCHAR", length: p.length ?? "", primaryKey: p.primaryKey, foreignKey: p.foreignKey || !!cols[i]?.referenceTo, nullable: p.nullable, unique: p.unique, defaultValue: p.defaultValue ?? "" };
+      const col = cols[i];
+      if (!col) tx.insert(entity, "columns", create("ERDColumn", values));
+      else for (const [k, v] of Object.entries(values)) if ((col[k] ?? "") !== v) tx.set(col, k, v);
+    });
+    for (const extra of cols.slice(parsed.length)) tx.remove(extra);
+  });
+}
+
+/** "WHERE idAlbum = 156" → operator WHERE, expression "idAlbum = 156" (σ, π… accepted too). */
+export function editOperator(repo: Repository, op: Element, text: string): void {
+  const src = text.trim();
+  const bySymbol = Object.entries(RA_SYMBOLS).find(([, sym]) => src.startsWith(sym));
+  const byWord = [...RA_OPERATORS].sort((a, b) => b.length - a.length).find((o) => src.toUpperCase().startsWith(o) && !/\w/.test(src[o.length] ?? ""));
+  const operator = byWord ?? bySymbol?.[0] ?? op.operator;
+  const expression = byWord ? src.slice(byWord.length).trim() : bySymbol ? src.slice(bySymbol[1].length).trim() : src;
+  repo.transact("Edit operator", (tx) => {
+    if (operator !== op.operator) tx.set(op, "operator", operator);
+    if (expression !== op.expression) tx.set(op, "expression", expression);
+  });
+}
+
+/** "Album a" → relation Album, alias a. */
+export function editRelation(repo: Repository, rel: Element, text: string): void {
+  const [name = "", alias = ""] = text.trim().split(/\s+(?:AS\s+)?/i);
+  repo.transact("Edit relation", (tx) => {
+    tx.set(rel, "name", name);
+    tx.set(rel, "alias", alias);
+  });
 }

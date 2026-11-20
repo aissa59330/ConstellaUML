@@ -26,6 +26,7 @@
 | Lucide | icônes d'interface — finalement non utilisé : icônes dessinées pour le projet | ISC | — |
 | Inter, JetBrains Mono | polices | SIL OFL 1.1 | ☐ |
 | Vitest, jsdom | tests | MIT | ☑ |
+| *(phase 3)* Parseurs de reverse engineering, générateurs, écrivain ZIP | code écrit pour le projet — aucune dépendance ajoutée (tree-sitter, Chevrotain et node-sql-parser restent non utilisés) | — | — |
 | tsx | exécution du script de rendu des démos (`scripts/render-demos.ts`) | MIT | ☑ |
 | librsvg (`rsvg-convert`, outil système, non embarqué) | conversion SVG → PNG des captures de doc | LGPL-2.1+ | ☑ |
 | fast-check, Playwright | tests (à venir) | MIT / Apache-2.0 | ☐ |

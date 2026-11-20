@@ -8,7 +8,11 @@ import {
   addFeature,
   deleteFromModel,
   editAttribute,
+  editEntity,
   editFlow,
+  editOperator,
+  editRelation,
+  entityText,
   editMessage,
   editOperation,
   editTransition,
@@ -55,6 +59,9 @@ function quickEditTarget(view: Element): { text: string; multiline: boolean } | 
     return { text: m.name ?? "", multiline: false };
   }
   if (!model) return null;
+  if (model._type === "ERDEntity") return { text: entityText(model), multiline: true };
+  if (model._type === "RAOperator") return { text: `${model.operator ?? ""} ${model.expression ?? ""}`.trim(), multiline: false };
+  if (model._type === "RARelation") return { text: `${model.name ?? ""}${model.alias ? ` ${model.alias}` : ""}`, multiline: false };
   if (view._type === "UMLTransitionView") return { text: transitionLabel(model), multiline: false };
   if (view._type === "UMLSeqMessageView") return { text: `${model.guard ? `[${model.guard}] ` : ""}${model.assignmentTarget ? `${model.assignmentTarget} = ` : ""}${model.name ?? ""}${model.arguments ? `(${model.arguments})` : ""}`, multiline: false };
   if (meta.isKindOf(model._type, "UMLActivityEdge")) return { text: `${model.guard ? `[${model.guard}] ` : ""}${model.name ?? ""}`, multiline: false };
@@ -77,6 +84,9 @@ function applyQuickEdit(view: Element, text: string): void {
     return;
   }
   if (!model) return;
+  if (model._type === "ERDEntity") return editEntity(repo, model, text);
+  if (model._type === "RAOperator") return editOperator(repo, model, text);
+  if (model._type === "RARelation") return editRelation(repo, model, text);
   if (view._type === "UMLTransitionView") return editTransition(repo, model, text);
   if (view._type === "UMLSeqMessageView") return editMessage(repo, model, text);
   if (meta.isKindOf(model._type, "UMLActivityEdge")) return editFlow(repo, model, text);

@@ -277,6 +277,44 @@ export const TOOLBOXES: Record<string, ToolGroup[]> = {
     ]),
     annotationGroup,
   ],
+  ERDDiagram: [
+    group("erd", [
+      n2("entity", "ERDEntityView", "ERDEntity", [160, 90], { baseName: "Entity" }),
+      e2("relOneToOne", "ERDRelationshipView", "ERDRelationship", { variant: "1:1" }),
+      e2("relOneToMany", "ERDRelationshipView", "ERDRelationship", { variant: "1:0..*" }),
+      e2("relManyToMany", "ERDRelationshipView", "ERDRelationship", { variant: "0..*:0..*" }),
+      e2("relIdentifying", "ERDRelationshipView", "ERDRelationship", { variant: "1:1..*:identifying" }),
+    ]),
+    annotationGroup,
+  ],
+  ERDRelationalDiagram: [
+    group("relational", [
+      n2("table", "ERDTableView", "ERDEntity", [220, 56], { baseName: "Table" }),
+      e2("foreignKey", "ERDForeignKeyView", "ERDRelationship", { variant: "fk" }),
+    ]),
+    annotationGroup,
+  ],
+  RAQueryDiagram: [
+    group("queryTree", [
+      n2("relation", "RARelationView", "RARelation", [80, 30], { baseName: "Table" }),
+      n2("ra_select", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "SELECT", expression: "*" } }),
+      n2("ra_where", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "WHERE", expression: "" } }),
+      n2("ra_join", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "JOIN", expression: "" } }),
+      n2("ra_leftJoin", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "LEFT JOIN", expression: "" } }),
+      n2("ra_crossJoin", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "CROSS JOIN", expression: "" } }),
+      n2("ra_groupBy", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "GROUP BY", expression: "" } }),
+      n2("ra_having", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "HAVING", expression: "" } }),
+      n2("ra_distinct", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "DISTINCT", expression: "" } }),
+      n2("ra_orderBy", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "ORDER BY", expression: "" } }),
+      n2("ra_limit", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "LIMIT", expression: "" } }),
+      n2("ra_union", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "UNION", expression: "" } }),
+      n2("ra_intersect", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "INTERSECT", expression: "" } }),
+      n2("ra_except", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "EXCEPT", expression: "" } }),
+      n2("ra_rename", "RAOperatorView", "RAOperator", [70, 28], { baseName: "Operator", icon: "operator", init: { operator: "RENAME", expression: "" } }),
+      e2("flow", "RAFlowView", "RAFlow"),
+    ]),
+    annotationGroup,
+  ],
   UMLInformationFlowDiagram: [
     group("informationFlow", [
       n2("informationItem", "UMLInformationItemView", "UMLInformationItem", [140, 56]),
@@ -314,6 +352,9 @@ export const DIAGRAM_TYPES: { type: string; owner?: string }[] = [
   { type: "UMLStatechartDiagram", owner: "UMLStateMachine" },
   { type: "UMLProfileDiagram" },
   { type: "UMLInformationFlowDiagram" },
+  { type: "ERDDiagram", owner: "ERDDataModel" },
+  { type: "ERDRelationalDiagram", owner: "ERDDataModel" },
+  { type: "RAQueryDiagram", owner: "RAQuery" },
 ];
 
 /** FR / EN labels of tools, toolbox groups and diagram types. */
@@ -332,6 +373,35 @@ export const NOTATION_LABELS: Record<string, [string, string]> = {
   "toolbox.state": ["États", "State Machine"],
   "toolbox.profile": ["Profils", "Profile"],
   "toolbox.informationFlow": ["Flux d'informations", "Information Flow"],
+  "toolbox.erd": ["Entité-relation", "Entity-Relationship"],
+  "tool.entity": ["Entité", "Entity"],
+  "tool.relOneToOne": ["Relation 1–1", "One-to-One"],
+  "tool.relOneToMany": ["Relation 1–n", "One-to-Many"],
+  "tool.relManyToMany": ["Relation n–n", "Many-to-Many"],
+  "tool.relIdentifying": ["Relation identifiante", "Identifying Relationship"],
+  "diagram.ERDDiagram": ["Diagramme entité-relation", "ER Diagram"],
+  "diagram.ERDRelationalDiagram": ["Modèle relationnel", "Relational Model"],
+  "toolbox.relational": ["Modèle relationnel", "Relational Model"],
+  "tool.table": ["Table", "Table"],
+  "tool.foreignKey": ["Clé étrangère", "Foreign Key"],
+  "diagram.RAQueryDiagram": ["Arbre de requête", "Query Tree"],
+  "toolbox.queryTree": ["Arbre de requête", "Query Tree"],
+  "tool.relation": ["Relation (table)", "Relation (table)"],
+  "tool.flow": ["Flux", "Flow"],
+  "tool.ra_select": ["SELECT", "SELECT"],
+  "tool.ra_where": ["WHERE", "WHERE"],
+  "tool.ra_join": ["JOIN", "JOIN"],
+  "tool.ra_leftJoin": ["LEFT JOIN", "LEFT JOIN"],
+  "tool.ra_crossJoin": ["CROSS JOIN", "CROSS JOIN"],
+  "tool.ra_groupBy": ["GROUP BY", "GROUP BY"],
+  "tool.ra_having": ["HAVING", "HAVING"],
+  "tool.ra_distinct": ["DISTINCT", "DISTINCT"],
+  "tool.ra_orderBy": ["ORDER BY", "ORDER BY"],
+  "tool.ra_limit": ["LIMIT", "LIMIT"],
+  "tool.ra_union": ["UNION", "UNION"],
+  "tool.ra_intersect": ["INTERSECT", "INTERSECT"],
+  "tool.ra_except": ["EXCEPT", "EXCEPT"],
+  "tool.ra_rename": ["RENAME", "RENAME"],
   "tool.classLite": ["Classe", "Class"],
   "tool.containment": ["Contenance", "Containment"],
   "tool.import": ["Import de paquetage", "Package Import"],
@@ -438,6 +508,13 @@ export const NOTATION_LABELS: Record<string, [string, string]> = {
   "diagram.UMLInformationFlowDiagram": ["Diagramme de flux d'informations", "Information Flow Diagram"],
 };
 
+/** Per-diagram overrides of VIEW_FOR_MODEL (same model, other notation). */
+export const VIEW_FOR_MODEL_IN: Record<string, Record<string, string>> = {
+  ERDRelationalDiagram: { ERDEntity: "ERDTableView", ERDRelationship: "ERDForeignKeyView" },
+};
+
+export const viewTypeFor = (diagram: { _type: string }, modelType: string): string | undefined => VIEW_FOR_MODEL_IN[diagram._type]?.[modelType] ?? VIEW_FOR_MODEL[modelType];
+
 /** View type used when dropping a model element from the explorer. */
 export const VIEW_FOR_MODEL: Record<string, string> = {
   UMLClass: "UMLClassView",
@@ -483,4 +560,9 @@ export const VIEW_FOR_MODEL: Record<string, string> = {
   UMLObjectFlow: "UMLObjectFlowView",
   UMLExtension: "UMLExtensionView",
   UMLInformationFlow: "UMLInformationFlowView",
+  ERDEntity: "ERDEntityView",
+  ERDRelationship: "ERDRelationshipView",
+  RARelation: "RARelationView",
+  RAOperator: "RAOperatorView",
+  RAFlow: "RAFlowView",
 };

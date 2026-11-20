@@ -166,6 +166,35 @@ const P: Record<string, () => JSX.Element> = {
   ellipse: () => <ellipse cx="8" cy="8" rx="6" ry="4.5" />,
   hyperlink: () => <path d="M6.5 9.5l3-3M7 4.5l1.5-1.5a2.8 2.8 0 014 4L11 8.5M9 11.5L7.5 13a2.8 2.8 0 01-4-4L5 7.5" />,
   freeline: () => <path d="M2 12c3-8 5 2 8-4s3-3 4-4" />,
+  entity: () => (
+    <>
+      <rect x="2" y="2.5" width="12" height="11" rx="0.5" />
+      <path d="M2 6h12M5.5 6v7.5" />
+    </>
+  ),
+  table: () => (
+    <>
+      <path d="M2 5h12M2 11h12" />
+      <path d="M3 3.5h5" />
+      <path d="M3 8h3M8 8h3" />
+    </>
+  ),
+  column: () => <path d="M3 8h10M3 5.5h2M3 10.5h2" />,
+  relOneToOne: () => <path d="M2 8h12M4 5v6M6 5v6M10 5v6M12 5v6" />,
+  relOneToMany: () => <path d="M2 8h12M4 5v6M6 5v6M10 8l4-3M10 8l4 3" />,
+  relManyToMany: () => <path d="M2 8h12M6 8L2 5M6 8L2 11M10 8l4-3M10 8l4 3" />,
+  relIdentifying: () => <path d="M2 8h12M4 5v6M10 8l4-3M10 8l4 3M8 6.5v3" />,
+  foreignKey: () => <path d="M8 14V3M5 6l3-3 3 3" />,
+  relation: () => <rect x="2.5" y="4.5" width="11" height="7" />,
+  flow: () => <path d="M8 2v11M5 10l3 3 3-3" />,
+  operator: () => <rect x="2" y="5" width="12" height="6" rx="3" />,
+  query: () => (
+    <>
+      <rect x="5" y="1.5" width="6" height="3.5" />
+      <rect x="4" y="11" width="8" height="3.5" rx="1.75" />
+      <path d="M8 5v6" />
+    </>
+  ),
   diagram: () => (
     <>
       <rect x="2" y="2" width="12" height="12" rx="1.5" />
@@ -279,6 +308,14 @@ export function iconForType(type: string): string {
     UMLObject: "object",
     UMLStereotype: "stereotype",
     UMLProfile: "profile",
+    ERDDataModel: "model",
+    ERDEntity: "entity",
+    ERDColumn: "column",
+    ERDRelationship: "relOneToMany",
+    RAQuery: "query",
+    RARelation: "relation",
+    RAOperator: "operator",
+    RAFlow: "flow",
   };
   if (map[type]) return map[type];
   if (type.endsWith("Diagram")) return "diagram";

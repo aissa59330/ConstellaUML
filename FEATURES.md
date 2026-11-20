@@ -8,7 +8,8 @@
 
 - **Phase 0** : validée.
 - **Phase 1** (noyau + diagramme de classes) : validée (vérifiée dans l'app à ta demande).
-- **Phase 2** (tous les autres diagrammes UML) : livrée, en attente de ta validation. Les 14 types sont créables, éditables, sauvegardés en `.mdj` et exportés (tests de rendu par type + images dans [docs/screenshots/diagrams](docs/screenshots/diagrams)). Rien n'est encore marqué `[x]` : il faut ton essai dans l'app native.
+- **Phase 2** (tous les autres diagrammes UML) : validée (« continue »), retours prévus plus tard.
+- **Phase 3** (génération de code, reverse engineering, ERD, SQL + modèle relationnel et arbre de requête demandés en cours de route) : livrée, en attente de ta validation. Les 14 types sont créables, éditables, sauvegardés en `.mdj` et exportés (tests de rendu par type + images dans [docs/screenshots/diagrams](docs/screenshots/diagrams)). Rien n'est encore marqué `[x]` : il faut ton essai dans l'app native.
 
 ## Sources de la phase 0
 
@@ -228,8 +229,11 @@
 
 ## 7. Autres diagrammes
 
-- [ ] ERD-001 (P3) **ERD/MCD** : Data Model, Entity, Column (PK, FK, référence, type, longueur, nullable, unique), Relationship (cardinalités, notation pied-de-corbeau)
-- [ ] ERD-002 (P3) ⭐ Vue MCD Merise (associations porteuses, cardinalités `0,n`/`1,1`) et passage MCD → MLD → MPD
+- [~] ERD-001 (P3) **ERD/MCD** : Data Model, Entity, Column (PK, FK, référence, type, longueur, nullable, unique), Relationship (cardinalités, notation pied-de-corbeau)
+- [ ] ERD-002 (P3) ⭐ Vue MCD Merise (associations porteuses, cardinalités `0,n`/`1,1`) et passage MCD → MLD → MPD — *partiel* : passage ERD ⇄ modèle relationnel (MLD) et MLD → SQL (MPD) ; manque la vue Merise à associations porteuses
+- [~] REL-001 (P3) ⭐ **Modèle relationnel** (MLD) : tables sur une ligne, clé primaire soulignée, clé étrangère `*`, types entre parenthèses, flèches `FK(colonnes)` ; création automatique de la colonne FK ; conversion depuis/vers l'ERD en gardant les positions
+- [~] RA-001 (P3) ⭐ **Arbre de requête** (algèbre relationnelle) : relations, opérateurs (SELECT, WHERE, JOIN…, notation SQL ou σ π ⋈), flux ; génération de l'arbre depuis une requête SELECT (jointures, alias, GROUP BY, HAVING, ORDER BY, LIMIT, UNION…)
+- [ ] DRW-001 (P4) ⭐ Dessin libre façon draw.io : bibliothèque de formes génériques, connecteurs, texte libre
 - [ ] FLC-001 (P4) **Flowchart** : Process, Terminator, Decision, Delay, Predefined/Alternate Process, Data, Document, Multi-Document, Preparation, Display, Manual Input/Operation, Card, Punched Tape, Connector, Off-Page Connector, Or, Summing Junction, Collate, Sort, Merge, Extract, Stored Data, Database, Direct Access Storage, Internal Storage, Flow
 - [ ] DFD-001 (P4) **DFD** : External Entity, Process, Datastore, Data Flow
 - [ ] BPMN-001 (P4) **BPMN** : Process, Pool, Lane, activités (Task typées, Sub-Process), Events (start/intermédiaire/frontière/fin, avec types), Gateways, Data Objects, Data Association, Message, Message Flow, Choreography Task, Conversation, Conversation Link, Text Annotation, Association, Group
@@ -246,17 +250,17 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 
 | Id | Langage | Génération | Reverse |
 |---|---|---|---|
-| CG-JAVA | Java | [ ] | [ ] |
-| CG-CS | C# | [ ] | — |
-| CG-CPP | C++ (.h/.cpp) | [ ] | — |
-| CG-PY | Python | [ ] | [ ] |
-| CG-TS | TypeScript | [ ] | [ ] |
-| CG-PHP | PHP | [ ] | [ ] |
-| CG-SQL | SQL DDL (MySQL/MariaDB, PostgreSQL, SQLite) depuis l'ERD | [ ] | [ ] |
+| CG-JAVA | Java (sortie non compilée : pas de `javac` sur la machine) | [~] | [~] |
+| CG-CS | C# (sortie non compilée : pas de compilateur C#) | [~] | — |
+| CG-CPP | C++ (.h/.cpp), compilé par `g++` dans les tests | [~] | — |
+| CG-PY | Python, importé et exécuté dans les tests | [~] | [~] |
+| CG-TS | TypeScript, vérifié par `tsc --strict` | [~] | [~] |
+| CG-PHP | PHP, vérifié par `php -l` | [~] | [~] |
+| CG-SQL | SQL DDL (MySQL/MariaDB, PostgreSQL, SQLite) depuis l'ERD, exécuté dans SQLite par les tests | [~] | [~] |
 
-- [ ] RE-001 Le reverse crée diagrammes de hiérarchie de types, de structure de paquetages et d'ERD (options)
-- [ ] RE-002 Tolérance aux erreurs de syntaxe (le reste du fichier est analysé)
-- [ ] RE-003 Import d'un schéma depuis une connexion **MariaDB/MySQL** active (hôte, port, base) → ERD
+- [~] RE-001 Le reverse crée diagrammes de hiérarchie de types, de structure de paquetages et d'ERD (options) — un diagramme de classes par paquetage (super-types au-dessus), un diagramme de paquetages, ERD + MLD pour le SQL
+- [~] RE-002 Tolérance aux erreurs de syntaxe (le reste du fichier est analysé)
+- [ ] RE-003 Import d'un schéma depuis une connexion **MariaDB/MySQL** active (hôte, port, base) → ERD — pas encore fait (l'import d'un script SQL / d'un `mysqldump` est disponible)
 - [ ] CG-100 (P4) ⭐ Export d'un diagramme de classes vers un **squelette de projet** (Maven/Gradle, npm/tsconfig, pyproject, composer…) : arborescence + fichiers
 - [ ] CG-101 (P4) Génération par templates (équivalent de la commande `ejs`)
 

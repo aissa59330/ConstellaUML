@@ -15,7 +15,7 @@ const CHILD_FIELDS = [
   "ownedElements", "attributes", "operations", "receptions", "literals", "parameters", "templateParameters",
   "participants", "messages", "fragments", "operands", "nodes", "edges", "groups", "subpartitions", "inputs", "outputs",
   "regions", "vertices", "transitions", "connections", "triggers", "effects", "entryActivities", "doActivities", "exitActivities",
-  "extensionPoints", "slots", "tags",
+  "extensionPoints", "slots", "tags", "columns",
 ];
 
 function childrenOf(el: Element): Element[] {
@@ -34,7 +34,10 @@ function label(el: Element, showSt: boolean): string {
 }
 
 const ADDABLE: [string, string[]][] = [
-  ["Project", ["UMLModel", "UMLPackage", "UMLProfile"]],
+  ["Project", ["UMLModel", "UMLPackage", "UMLProfile", "ERDDataModel"]],
+  ["ERDDataModel", ["ERDEntity"]],
+  ["ERDEntity", ["ERDColumn"]],
+  ["RAQuery", ["RARelation", "RAOperator"]],
   [
     "UMLPackage",
     ["UMLPackage", "UMLModel", "UMLSubsystem", "UMLClass", "UMLInterface", "UMLEnumeration", "UMLDataType", "UMLPrimitiveType", "UMLSignal", "UMLActor", "UMLUseCase", "UMLComponent", "UMLArtifact", "UMLNode", "UMLObject", "UMLCollaboration", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLInformationItem", "UMLStereotype", "UMLConstraint"],

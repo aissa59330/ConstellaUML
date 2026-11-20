@@ -189,6 +189,10 @@ export type DialogState =
   | { kind: "find" }
   | { kind: "about" }
   | { kind: "shortcuts" }
+  | { kind: "codegen" }
+  | { kind: "reverse" }
+  | { kind: "sqlImport" }
+  | { kind: "queryTree" }
   | { kind: "confirm"; message: string; buttons: { label: string; value: string; primary?: boolean }[]; resolve: (v: string) => void };
 export const [dialog, setDialog] = createSignal<DialogState | null>(null);
 

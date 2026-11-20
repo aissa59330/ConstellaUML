@@ -67,6 +67,73 @@ fn autosave_clear(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// Folders never worth reverse engineering (dependencies, build output, VCS).
+const SKIPPED_DIRS: &[&str] = &["node_modules", ".git", "target", "build", "dist", "vendor", "__pycache__", ".venv", "venv", ".idea", ".gradle", "out"];
+const MAX_FILES: usize = 5000;
+const MAX_FILE_SIZE: u64 = 2 * 1024 * 1024;
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct SourceFile {
+    path: String,
+    content: String,
+}
+
+fn collect_sources(root: &Path, dir: &Path, extensions: &[String], out: &mut Vec<SourceFile>) -> Result<(), String> {
+    let mut entries: Vec<_> = fs::read_dir(dir).map_err(err)?.filter_map(|e| e.ok()).collect();
+    entries.sort_by_key(|e| e.file_name());
+    for entry in entries {
+        if out.len() >= MAX_FILES {
+            break;
+        }
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().into_owned();
+        let ft = entry.file_type().map_err(err)?;
+        if ft.is_dir() {
+            if !SKIPPED_DIRS.contains(&name.as_str()) && !name.starts_with('.') {
+                collect_sources(root, &path, extensions, out)?;
+            }
+        } else if ft.is_file() && extensions.iter().any(|x| name.ends_with(x.as_str())) {
+            if entry.metadata().map(|m| m.len()).unwrap_or(0) > MAX_FILE_SIZE {
+                continue;
+            }
+            // Non-UTF-8 files are skipped rather than failing the whole import.
+            if let Ok(content) = fs::read_to_string(&path) {
+                let rel = path.strip_prefix(root).unwrap_or(&path).to_string_lossy().replace('\\', "/");
+                out.push(SourceFile { path: rel, content });
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Source files under `root` with one of `extensions`, paths relative to `root`.
+#[tauri::command]
+fn read_source_tree(root: String, extensions: Vec<String>) -> Result<Vec<SourceFile>, String> {
+    let mut out = Vec::new();
+    collect_sources(Path::new(&root), Path::new(&root), &extensions, &mut out)?;
+    Ok(out)
+}
+
+/// `rel` joined to `root`, refusing absolute paths and ".." so generated
+/// files can never land outside the chosen folder.
+fn safe_join(root: &Path, rel: &str) -> Result<PathBuf, String> {
+    let p = Path::new(rel);
+    if p.is_absolute() || p.components().any(|c| !matches!(c, std::path::Component::Normal(_))) {
+        return Err(format!("chemin refusé : {rel}"));
+    }
+    Ok(root.join(p))
+}
+
+/// Writes generated files under `root` (folders created as needed).
+#[tauri::command]
+fn write_files(root: String, files: Vec<SourceFile>) -> Result<usize, String> {
+    let root = Path::new(&root);
+    for f in &files {
+        write_atomic(&safe_join(root, &f.path)?, f.content.as_bytes())?;
+    }
+    Ok(files.len())
+}
+
 /// First command-line argument ending in .mdj / .mfj (file association, CLI).
 #[tauri::command]
 fn startup_file() -> Option<String> {
@@ -88,7 +155,9 @@ pub fn run() {
             autosave_write,
             autosave_read,
             autosave_clear,
-            startup_file
+            startup_file,
+            read_source_tree,
+            write_files
         ])
         .run(tauri::generate_context!())
         .expect("erreur au lancement de Constella");
@@ -106,6 +175,21 @@ mod tests {
         write_atomic(&file, b"two").unwrap();
         assert_eq!(fs::read_to_string(&file).unwrap(), "two");
         assert!(!dir.join(".a.mdj.tmp").exists());
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn generated_files_stay_inside_the_folder() {
+        let dir = std::env::temp_dir().join(format!("constella-gen-{}", std::process::id()));
+        let files = vec![SourceFile { path: "a/B.java".into(), content: "class B {}".into() }];
+        assert_eq!(write_files(dir.to_string_lossy().into(), files).unwrap(), 1);
+        assert_eq!(fs::read_to_string(dir.join("a/B.java")).unwrap(), "class B {}");
+        for bad in ["../x.txt", "/etc/x", "a/../../x"] {
+            assert!(safe_join(&dir, bad).is_err(), "{bad}");
+        }
+        let found = read_source_tree(dir.to_string_lossy().into(), vec![".java".into()]).unwrap();
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].path, "a/B.java");
         fs::remove_dir_all(dir).unwrap();
     }
 }

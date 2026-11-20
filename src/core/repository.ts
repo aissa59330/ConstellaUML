@@ -93,8 +93,8 @@ export class Repository {
   relationshipsOf(id: string): Element[] {
     const out = new Set<Element>();
     for (const r of this.referrers(id)) {
-      if (meta.isKindOf(r._type, "UMLDirectedRelationship") && (r.source?.$ref === id || r.target?.$ref === id)) out.add(r);
-      if (r._type === "UMLAssociationEnd") {
+      if ((meta.isKindOf(r._type, "UMLDirectedRelationship") || r._type === "RAFlow") && (r.source?.$ref === id || r.target?.$ref === id)) out.add(r);
+      if (r._type === "UMLAssociationEnd" || r._type === "ERDRelationshipEnd") {
         const assoc = this.parentOf(r);
         if (assoc) out.add(assoc);
       }

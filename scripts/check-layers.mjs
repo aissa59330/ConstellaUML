@@ -1,14 +1,16 @@
-// Enforces the layer rules of ARCHITECTURE.md: core ← notation ← render ← editor ← ui.
+// Enforces the layer rules of ARCHITECTURE.md: core ← notation ← render ← editor ← ui;
+// io and codegen depend on core only.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, dirname } from "node:path";
 
 const ALLOWED = {
   core: ["core"],
   io: ["core", "io"],
+  codegen: ["core", "codegen"],
   notation: ["core", "notation", "render"],
   render: ["core", "notation", "render"],
   editor: ["core", "notation", "render", "editor"],
-  ui: ["core", "io", "notation", "render", "editor", "ui"],
+  ui: ["core", "io", "codegen", "notation", "render", "editor", "ui"],
 };
 
 const files = [];

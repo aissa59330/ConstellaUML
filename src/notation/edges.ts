@@ -331,7 +331,22 @@ export function drawLabels(e: Element, labels: Element[], color: string, g: Grap
 
 // ---- arrowheads -----------------------------------------------------------
 
-export type EndStyle = "none" | "triangle" | "filledTriangle" | "open" | "solidArrow" | "diamond" | "filledDiamond" | "cross" | "circle" | "circlePlus";
+export type EndStyle =
+  | "none"
+  | "triangle"
+  | "filledTriangle"
+  | "open"
+  | "solidArrow"
+  | "diamond"
+  | "filledDiamond"
+  | "cross"
+  | "circle"
+  | "circlePlus"
+  // Crow's foot (ERD): exactly one, zero or one, one or many, zero or many.
+  | "crowOne"
+  | "crowZeroOne"
+  | "crowOneMany"
+  | "crowZeroMany";
 
 /** Draws a decoration at `tip`, pointing away from `from`. */
 export function drawEnd(g: Graphics, style: EndStyle, tip: Point, from: Point, stroke: StrokeStyle, fill: string): void {
@@ -373,6 +388,21 @@ export function drawEnd(g: Graphics, style: EndStyle, tip: Point, from: Point, s
     case "circle":
       g.ellipse({ x: tip.x - 5, y: tip.y - 5, w: 10, h: 10 }, fill, solid);
       break;
+    case "crowOne":
+    case "crowZeroOne":
+    case "crowOneMany":
+    case "crowZeroMany": {
+      const many = style === "crowOneMany" || style === "crowZeroMany";
+      const zero = style === "crowZeroOne" || style === "crowZeroMany";
+      if (many) for (const side of [7, 0, -7]) g.polyline([pt(12, 0), pt(0, side)], solid);
+      // Inner mark: a bar for "one"; outer mark: a bar ("exactly") or a circle ("optional").
+      g.polyline([pt(many ? 16 : 8, 6), pt(many ? 16 : 8, -6)], solid);
+      if (zero) {
+        const c = pt(many ? 24 : 18, 0);
+        g.ellipse({ x: c.x - 5, y: c.y - 5, w: 10, h: 10 }, fill, solid);
+      } else if (!many) g.polyline([pt(14, 6), pt(14, -6)], solid);
+      break;
+    }
   }
 }
 

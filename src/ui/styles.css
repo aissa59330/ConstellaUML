@@ -1333,3 +1333,63 @@ textarea.field-input {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ---- code generation preview ---------------------------------------------- */
+.code-preview {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  height: min(46vh, 420px);
+}
+.code-files {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.code-files li {
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.code-files li.on {
+  background: var(--accent-soft);
+}
+.code-text {
+  margin: 0;
+  padding: 8px 10px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  font: 12px/1.45 "JetBrains Mono", ui-monospace, monospace;
+  white-space: pre;
+}
+.code-text.log {
+  max-height: 200px;
+  margin-top: 12px;
+}
+.code-input {
+  width: 100%;
+  font: 12px/1.45 "JetBrains Mono", ui-monospace, monospace;
+  resize: vertical;
+}
+@media (max-width: 640px) {
+  .code-preview {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .code-files {
+    max-height: 120px;
+  }
+  .code-text {
+    max-height: 40vh;
+  }
+}

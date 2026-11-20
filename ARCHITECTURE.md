@@ -154,3 +154,12 @@ Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur 
 - **Zone peinte** (`setPaintedBounds`) : ce qui est dessiné hors du rectangle d'une vue (nom sous un acteur, labels de messages de communication) compte pour l'export et « ajuster ».
 - **Ombres SVG** : copie décalée semi-transparente plutôt qu'un filtre `feDropShadow`, que librsvg/LibreOffice n'affichent pas.
 - **Timing** : modèle simplifié (`timingStates`, `timeline` = `état@t; …`), à rendre compatible StarUML plus tard.
+
+## 16. Décisions de la phase 3 (code, reverse, données)
+
+- **Couche `codegen`** (`src/codegen/`) : ne dépend que de `core`. Les générateurs lisent une représentation commune (`model.ts` : classificateurs, champs, opérations, associations navigables → champs) puis écrivent chaque langage (`langs/*.ts`). Les corps d'opération non spécifiés lèvent une exception « non implémenté », pour que le code généré compile tel quel.
+- **Reverse sans dépendance** : parseurs de déclarations écrits pour le projet (Java, TypeScript, PHP, Python, SQL DDL) sur un tokenizer tolérant commun (`core/lexer.ts`). Les corps de méthodes sont sautés, jamais analysés ; un groupe mal fermé ou une liste de paramètres cassée n'avale pas le reste du fichier. Choix fait plutôt que tree-sitter : aucune dépendance native ni WASM, et les tests valident l'aller-retour génération → reverse pour chaque langage.
+- **Données** : ERD (`ERD*`, noms compatibles `.mdj`), modèle relationnel = autre notation des mêmes entités (`ERDTableView`, `ERDForeignKeyView`), arbre de requête = métamodèle `RA*` (relations, opérateurs, flux). `convertDiagram` passe d'une notation à l'autre en gardant les positions.
+- **Mise en page automatique** (`notation/uml/autolayout.ts`) : couches selon l'héritage / les clés étrangères (parents au-dessus), lignes repliées au-delà de 1400 px ; la création du modèle et des diagrammes forme une seule étape d'annulation (`mergeKey`).
+- **Fichiers** : `read_source_tree` (lecture d'un dossier source en ignorant `node_modules`, `.git`, `target`…, 5000 fichiers / 2 Mo max) et `write_files` (refus des chemins absolus et de `..`). Dans le navigateur : sélection de dossier et téléchargement `.zip` (écrivain ZIP intégré, sans compression).
+- Les diagrammes ERD vivent pour l'instant dans `notation/erd` : ils passeront en extension intégrée quand l'API de plugins existera (phase 4).

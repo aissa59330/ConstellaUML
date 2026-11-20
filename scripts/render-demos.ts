@@ -6,6 +6,7 @@ import { Repository } from "../src/core/repository";
 import { newProject, serializeMdj } from "../src/io/mdj";
 import { approxMeasurer } from "../src/render/graphics";
 import { exportSvg } from "../src/render/diagram";
+import { buildQueryTree } from "../src/notation/uml";
 import { buildAllDemos } from "../src/dev/demos";
 
 const theme = process.argv.includes("dark") ? "dark" : "light";
@@ -13,6 +14,14 @@ const repo = new Repository();
 repo.load(newProject());
 const model = repo.root!.ownedElements[0];
 const diagrams = buildAllDemos(repo, model);
+// A tree generated from SQL, in algebra notation.
+const { diagram: joinTree } = buildQueryTree(
+  repo,
+  repo.root!,
+  "SELECT a.titre, c.chanson FROM Album a JOIN Chanson c ON a.idAlbum = c.idAlbum WHERE a.année > 2000 ORDER BY a.titre",
+);
+repo.transact("notation", (tx) => tx.set(joinTree, "notation", "algebra"));
+diagrams.RAQueryDiagramFromSql = joinTree;
 const out = theme === "dark" ? "docs/screenshots/diagrams/sombre" : "docs/screenshots/diagrams";
 mkdirSync(out, { recursive: true });
 for (const [type, d] of Object.entries(diagrams)) {

@@ -2,6 +2,7 @@
 // UI. Used by the rendering tests and to produce screenshots.
 import type { Element } from "../core/element";
 import { ref } from "../core/element";
+import { create } from "../core/factory";
 import type { Repository } from "../core/repository";
 import {
   addDiagram,
@@ -211,6 +212,50 @@ export const DEMOS: Record<string, Builder> = {
     const flow = e("informationFlow", a, c);
     const fm = repo.deref(flow.model)!;
     repo.transact("conveyed", (tx) => tx.set(fm, "conveyed", [ref(repo.deref(item.model)!)]));
+  },
+  ERDDiagram(repo, d) {
+    const { n, e } = kit(repo, d);
+    const author = n("entity", 60, 60, "author", 190, 90);
+    const book = n("entity", 380, 60, "book", 210, 110);
+    const cols = (v: Element, list: [string, string, string, boolean, boolean][]) =>
+      repo.transact("columns", (tx) => list.map(([name, type, length, primaryKey, foreignKey]) => tx.insert(repo.deref(v.model)!, "columns", create("ERDColumn", { name, type, length, primaryKey, foreignKey }))));
+    const [aid] = cols(author, [["id", "INT", "", true, false], ["name", "VARCHAR", "120", false, false]]);
+    const bcols = cols(book, [["isbn", "CHAR", "13", true, false], ["title", "VARCHAR", "200", false, false], ["author_id", "INT", "", false, true]]);
+    repo.transact("fk", (tx) => tx.set(bcols[2], "referenceTo", ref(aid)));
+    e("relOneToMany", author, book, "écrit");
+  },
+  ERDRelationalDiagram(repo, d) {
+    const { n, e } = kit(repo, d);
+    type Col = [string, string, boolean?, string?];
+    const table = (x: number, y: number, name: string, cols: Col[]) => {
+      const v = n("table", x, y, name, 40, 20);
+      const ent = repo.deref(v.model)!;
+      const made: Record<string, Element> = {};
+      repo.transact("columns", (tx) => {
+        for (const [cn, type, pk, refTo] of cols) {
+          const target = refTo ? findColumn(refTo) : undefined;
+          made[cn] = tx.insert(ent, "columns", create("ERDColumn", { name: cn, type, primaryKey: !!pk, foreignKey: !!target, ...(target ? { referenceTo: ref(target) } : {}) }));
+        }
+      });
+      Object.assign(columns, made);
+      return v;
+    };
+    const columns: Record<string, Element> = {};
+    const findColumn = (name: string) => columns[name];
+    const artiste = table(120, 20, "Artiste", [["idArtiste", "INT", true], ["nom", "TEXT"], ["image", "TEXT"]]);
+    const album = table(80, 140, "Album", [["idAlbum", "INT", true], ["titre", "TEXT"], ["année", "INT"], ["idArtiste", "INT", false, "idArtiste"]]);
+    const chanson = table(60, 260, "Chanson", [["noChanson", "INT", true], ["idAlbum", "INT", true, "idAlbum"], ["chanson", "TEXT"], ["durée", "TIME"]]);
+    e("foreignKey", album, artiste);
+    e("foreignKey", chanson, album);
+  },
+  RAQueryDiagram(repo, d) {
+    const { n, e } = kit(repo, d);
+    const album = n("relation", 40, 20, "Album", 80, 30);
+    const where = n("ra_where", 45, 90, undefined, 70, 28);
+    const select = n("ra_select", 45, 160, undefined, 70, 28);
+    repo.transact("expr", (tx) => tx.set(repo.deref(where.model)!, "expression", "idAlbum = 156"));
+    e("flow", album, where);
+    e("flow", where, select);
   },
 };
 

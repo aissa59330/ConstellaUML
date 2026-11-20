@@ -7,6 +7,7 @@ import type { DiagramEditor } from "../editor/DiagramEditor";
 import { exportFragment, parseMdj } from "../io/mdj";
 import {
   addDiagram,
+  convertDiagram,
   DIAGRAM_TYPES,
   addViewOfModel,
   copyModel,
@@ -173,6 +174,15 @@ function sameSize(w: boolean, h: boolean): void {
       if (h) tx.set(n, "height", ref.height);
     }
   });
+}
+
+/** ER diagram ⇄ relational model, opened next to the source. */
+function convertActive(target: "ERDDiagram" | "ERDRelationalDiagram"): void {
+  const d = s.activeDiagram();
+  if (!d) return;
+  const out = convertDiagram(s.repo, d, target);
+  s.openDiagram(out._id);
+  s.select([out]);
 }
 
 function reorderViews(front: boolean): void {
@@ -357,7 +367,8 @@ register(
       let owner = s.modelOf(sel()[0] ?? s.repo.root!) ?? s.repo.root!;
       if (meta.isKindOf(owner._type, "Diagram")) owner = s.repo.parentOf(owner) ?? s.repo.root!;
       // Diagrams go into packages / classifiers; anything else adds to its owner.
-      while (owner !== s.repo.root && !meta.isKindOf(owner._type, "UMLPackage") && !meta.isKindOf(owner._type, "UMLClassifier")) owner = s.repo.parentOf(owner) ?? s.repo.root!;
+      const behavior = DIAGRAM_TYPES.find((x) => x.type === type)?.owner;
+      while (owner !== s.repo.root && owner._type !== behavior && !meta.isKindOf(owner._type, "UMLPackage") && !meta.isKindOf(owner._type, "UMLClassifier")) owner = s.repo.parentOf(owner) ?? s.repo.root!;
       if (owner === s.repo.root) owner = (s.repo.root!.ownedElements ?? []).find((e: Element) => meta.isKindOf(e._type, "UMLPackage")) ?? s.repo.root!;
       const d = addDiagram(s.repo, owner, type);
       s.openDiagram(d._id);
@@ -366,6 +377,27 @@ register(
     enabled: hasProject,
   })),
   { id: "model:find", label: "cmd.model.find", keys: ["Ctrl+F"], run: () => s.setDialog({ kind: "find" }), enabled: hasProject },
+  {
+    id: "model:to-relational",
+    label: "cmd.model.toRelational",
+    run: () => convertActive("ERDRelationalDiagram"),
+    enabled: () => s.activeDiagram()?._type === "ERDDiagram",
+  },
+  { id: "model:to-erd", label: "cmd.model.toErd", run: () => convertActive("ERDDiagram"), enabled: () => s.activeDiagram()?._type === "ERDRelationalDiagram" },
+  {
+    id: "model:algebra-notation",
+    label: "cmd.model.algebraNotation",
+    run: () => {
+      const d = s.activeDiagram()!;
+      s.repo.transact("Notation", (tx) => tx.set(d, "notation", d.notation === "algebra" ? "sql" : "algebra"));
+    },
+    enabled: () => s.activeDiagram()?._type === "RAQueryDiagram",
+    checked: () => s.activeDiagram()?.notation === "algebra",
+  },
+  { id: "tools:generate-code", label: "cmd.tools.generateCode", run: () => s.setDialog({ kind: "codegen" }), enabled: hasProject },
+  { id: "tools:reverse", label: "cmd.tools.reverse", run: () => s.setDialog({ kind: "reverse" }), enabled: hasProject },
+  { id: "tools:import-sql", label: "cmd.tools.importSql", run: () => s.setDialog({ kind: "sqlImport" }), enabled: hasProject },
+  { id: "tools:query-tree", label: "cmd.tools.queryTree", run: () => s.setDialog({ kind: "queryTree" }), enabled: hasProject },
 
   { id: "view:quick-find", label: "cmd.view.quickFind", keys: ["Ctrl+P"], run: () => s.setDialog({ kind: "quickFind" }) },
   { id: "view:command-palette", label: "cmd.view.commandPalette", keys: ["Ctrl+Shift+P"], run: () => s.setDialog({ kind: "palette" }) },
@@ -559,9 +591,28 @@ export const MAIN_MENU: { label: string; items: MenuItem[] }[] = [
   },
   {
     label: "menu.model",
-    items: [{ label: "cmd.model.addDiagram", children: DIAGRAM_TYPES.map(({ type }) => ({ cmd: `model:add-diagram-${type}` })) }, { sep: true }, { cmd: "model:find" }],
+    items: [
+      { label: "cmd.model.addDiagram", children: DIAGRAM_TYPES.map(({ type }) => ({ cmd: `model:add-diagram-${type}` })) },
+      { sep: true },
+      { cmd: "model:to-relational" },
+      { cmd: "model:to-erd" },
+      { cmd: "model:algebra-notation" },
+      { sep: true },
+      { cmd: "model:find" },
+    ],
   },
-  { label: "menu.tools", items: [{ cmd: "view:command-palette" }] },
+  {
+    label: "menu.tools",
+    items: [
+      { cmd: "tools:generate-code" },
+      { cmd: "tools:reverse" },
+      { sep: true },
+      { cmd: "tools:import-sql" },
+      { cmd: "tools:query-tree" },
+      { sep: true },
+      { cmd: "view:command-palette" },
+    ],
+  },
   {
     label: "menu.view",
     items: [
