@@ -2,7 +2,7 @@
 import type { Element } from "../core/element";
 import { type Graphics, type Point, type Rect, type StrokeStyle, distToSegment } from "../render/graphics";
 import { nodeSpec } from "./shapes";
-import { type RenderCtx, boundsOf, ensureSub, fontOf, lineHeight, setBounds } from "./views";
+import { type RenderCtx, boundsOf, ensureSub, fontOf, layoutEpoch, lineHeight, setBounds } from "./views";
 
 export const LS_RECTILINEAR = 0;
 export const LS_OBLIQUE = 1;
@@ -94,13 +94,30 @@ function sideOf(r: Rect, p: Point): Side {
 const isAuto = (e: Element) => e.lineStyle === LS_RECTILINEAR || e.lineStyle === LS_ROUNDRECT || e.lineStyle === undefined;
 
 /** Computes attachment points so that edges sharing a node side don't overlap. */
-export function assignPorts(edges: Element[], ctx: RenderCtx): void {
+/**
+ * Spreads the attachment points of rectilinear edges sharing a node side.
+ * With `nodes`, only the sides of those nodes are recomputed (each still
+ * with every edge attached to it); `edges` must then be all the diagram's edges.
+ */
+export function assignPorts(edges: Element[], ctx: RenderCtx, nodes?: Set<string>): void {
   interface End {
     edge: Element;
     end: "tail" | "head";
     rect: Rect;
     side: Side;
     other: Point;
+  }
+  const version = layoutEpoch(ctx.repo);
+  const mine = (id: string) => !nodes || nodes.has(id);
+  // Forget the ports being recomputed (an edge alone on its side gets none).
+  for (const e of edges) {
+    const entry = ports.get(e);
+    if (!entry) continue;
+    if (!nodes || entry.version !== version) ports.delete(e);
+    else {
+      if (mine(e.tail?.$ref)) delete entry.tail;
+      if (mine(e.head?.$ref)) delete entry.head;
+    }
   }
   const groups = new Map<string, End[]>();
   const push = (key: string, v: End) => (groups.get(key) ?? groups.set(key, []).get(key)!).push(v);
@@ -110,10 +127,9 @@ export function assignPorts(edges: Element[], ctx: RenderCtx): void {
     if (!tv || !hv || tv === hv || tv.points !== undefined || hv.points !== undefined) continue;
     const a = boundsOf(tv), b = boundsOf(hv);
     const nat = orthogonalRoute(a, b);
-    push(`${tv._id}:${sideOf(a, nat[0])}`, { edge: e, end: "tail", rect: a, side: sideOf(a, nat[0]), other: center(b) });
-    push(`${hv._id}:${sideOf(b, nat[nat.length - 1])}`, { edge: e, end: "head", rect: b, side: sideOf(b, nat[nat.length - 1]), other: center(a) });
+    if (mine(tv._id)) push(`${tv._id}:${sideOf(a, nat[0])}`, { edge: e, end: "tail", rect: a, side: sideOf(a, nat[0]), other: center(b) });
+    if (mine(hv._id)) push(`${hv._id}:${sideOf(b, nat[nat.length - 1])}`, { edge: e, end: "head", rect: b, side: sideOf(b, nat[nat.length - 1]), other: center(a) });
   }
-  const version = ctx.repo.version;
   for (const list of groups.values()) {
     if (list.length < 2) continue;
     const h = isHorizontal(list[0].side);
@@ -169,7 +185,7 @@ export function routeEdge(e: Element, ctx: RenderCtx): Point[] {
   } else if (isAuto(e)) {
     pts = orthogonalRoute(tail, head);
     const pp = ports.get(e);
-    if (pp && pp.version === ctx.repo.version && (pp.tail || pp.head)) {
+    if (pp && pp.version === layoutEpoch(ctx.repo) && (pp.tail || pp.head)) {
       const p = pp.tail ?? pts[0], q = pp.head ?? pts[pts.length - 1];
       pts = orthoBetween(p, sideOf(tail, pts[0]), q, sideOf(head, pts[pts.length - 1]));
     }
@@ -185,7 +201,7 @@ export function routeEdge(e: Element, ctx: RenderCtx): Point[] {
     if (hv && isRound(hv, ctx)) pts[pts.length - 1] = clipToEllipse(boundsOf(hv), pts[pts.length - 2], pts[pts.length - 1]);
   }
   e.points = formatPoints(pts);
-  routes.set(e, { version: ctx.repo.version, pts });
+  routes.set(e, { version: layoutEpoch(ctx.repo), pts });
   return pts;
 }
 
@@ -219,12 +235,12 @@ export const customRouters = new Map<string, (e: Element, ctx: RenderCtx) => Poi
 /** Stores a route computed by a notation with its own routing (sequence messages). */
 export function setRoute(e: Element, pts: Point[], ctx: RenderCtx): void {
   e.points = formatPoints(pts);
-  routes.set(e, { version: ctx.repo.version, pts });
+  routes.set(e, { version: layoutEpoch(ctx.repo), pts });
 }
 
 export function routeOf(e: Element, ctx: RenderCtx): Point[] {
   const cached = routes.get(e);
-  if (cached && cached.version === ctx.repo.version) return cached.pts;
+  if (cached && cached.version === layoutEpoch(ctx.repo)) return cached.pts;
   if (customRouters.has(e._type)) return customRouters.get(e._type)!(e, ctx);
   return routeEdge(e, ctx);
 }

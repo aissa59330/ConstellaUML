@@ -19,6 +19,7 @@ registerRaMeta();
 export * from "./text";
 export * from "./commands";
 export * from "./toolbox";
+export * from "./addable";
 export { diagramOfElements, layoutDiagram } from "./autolayout";
 export * from "../erd/text";
 export { buildQueryTree, parseQuery, type QNode } from "../ra/query";

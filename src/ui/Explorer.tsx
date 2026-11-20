@@ -3,7 +3,7 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import type { Element } from "../core/element";
 import { meta } from "../core/meta/registry";
-import { DIAGRAM_TYPES, addDiagram, addModelElement, moveToOwner, renameElement } from "../notation/uml";
+import { DIAGRAM_TYPES, addDiagram, addModelElement, addableTypes, moveToOwner, renameElement } from "../notation/uml";
 import { stereotypeName } from "../notation/uml/text";
 import { type MenuItem, register } from "./commands";
 import { t } from "./i18n";
@@ -31,36 +31,6 @@ function label(el: Element, showSt: boolean): string {
   const name = el.name || (el._type === "UMLParameter" && el.direction === "return" ? "(return)" : "") || `(${el._type.replace(/^UML/, "")})`;
   const st = showSt ? stereotypeName(el.stereotype, (r) => s.repo.deref(r)) : "";
   return st ? `«${st}» ${name}` : name;
-}
-
-const ADDABLE: [string, string[]][] = [
-  ["Project", ["UMLModel", "UMLPackage", "UMLProfile", "ERDDataModel"]],
-  ["ERDDataModel", ["ERDEntity"]],
-  ["ERDEntity", ["ERDColumn"]],
-  ["RAQuery", ["RARelation", "RAOperator"]],
-  [
-    "UMLPackage",
-    ["UMLPackage", "UMLModel", "UMLSubsystem", "UMLClass", "UMLInterface", "UMLEnumeration", "UMLDataType", "UMLPrimitiveType", "UMLSignal", "UMLActor", "UMLUseCase", "UMLComponent", "UMLArtifact", "UMLNode", "UMLObject", "UMLCollaboration", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLInformationItem", "UMLStereotype", "UMLConstraint"],
-  ],
-  ["UMLEnumeration", ["UMLEnumerationLiteral", "UMLAttribute", "UMLOperation", "UMLConstraint"]],
-  ["UMLInteraction", ["UMLLifeline", "UMLMessage", "UMLCombinedFragment", "UMLInteractionUse", "UMLStateInvariant"]],
-  ["UMLActivity", ["UMLAction", "UMLObjectNode", "UMLActivityPartition"]],
-  ["UMLStateMachine", ["UMLRegion"]],
-  ["UMLUseCase", ["UMLExtensionPoint", "UMLAttribute", "UMLOperation"]],
-  ["UMLClassifier", ["UMLAttribute", "UMLOperation", "UMLReception", "UMLTemplateParameter", "UMLPort", "UMLClass", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLConstraint"]],
-  ["UMLRegion", ["UMLState", "UMLPseudostate", "UMLFinalState"]],
-  ["UMLState", ["UMLRegion"]],
-  ["UMLCombinedFragment", ["UMLInteractionOperand"]],
-  ["UMLInstance", ["UMLSlot"]],
-  ["UMLAction", ["UMLInputPin", "UMLOutputPin"]],
-  ["UMLOperation", ["UMLParameter"]],
-];
-
-function addableTypes(el: Element): string[] {
-  const out = new Set<string>();
-  for (const [base, types] of ADDABLE) if (meta.isKindOf(el._type, base)) for (const x of types) out.add(x);
-  if (meta.isKindOf(el._type, "ExtensibleModel")) out.add("Tag");
-  return [...out];
 }
 
 export const [expanded, setExpanded] = createSignal<Set<string>>(new Set());
@@ -146,7 +116,7 @@ export function Explorer() {
           const id = `explorer:add-${type}`;
           register({
             id,
-            label: type.replace(/^UML/, ""),
+            label: `type.${type}`,
             run: () => {
               const target = s.selection()[0] ?? s.repo.root!;
               const created = addModelElement(s.repo, target, type);

@@ -163,3 +163,10 @@ Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur 
 - **Mise en page automatique** (`notation/uml/autolayout.ts`) : couches selon l'héritage / les clés étrangères (parents au-dessus), lignes repliées au-delà de 1400 px ; la création du modèle et des diagrammes forme une seule étape d'annulation (`mergeKey`).
 - **Fichiers** : `read_source_tree` (lecture d'un dossier source en ignorant `node_modules`, `.git`, `target`…, 5000 fichiers / 2 Mo max) et `write_files` (refus des chemins absolus et de `..`). Dans le navigateur : sélection de dossier et téléchargement `.zip` (écrivain ZIP intégré, sans compression).
 - Les diagrammes ERD vivent pour l'instant dans `notation/erd` : ils passeront en extension intégrée quand l'API de plugins existera (phase 4).
+
+## 17. Performances
+
+- **Index inverse des références** (`Repository.referrers`) tenu à jour change par change (insertion, suppression, modification d'un champ référence), au lieu d'être reconstruit à chaque modification. Les sous-vues dérivées le mettent à jour via `registerDerived` / `reindexRefs`.
+- **Époques de mise en page** (`layoutState` dans `notation/views.ts`) : les caches de tracés et de ports restent valides tant que seules les géométries changent (`left`, `top`, `width`, `height`, `points`). Un déplacement ne remet en page que les vues déplacées, leurs liens et les côtés de nœuds concernés (`arrangeDiagram` incrémental) ; toute autre modification ouvre une nouvelle époque et une mise en page complète. Un test vérifie que les tracés obtenus sont identiques à ceux d'une mise en page complète.
+- **Dessin limité à la zone visible** (`drawDiagram(…, clip)`), **mini-carte** redessinée au plus 5 fois par seconde, **notifications de l'interface** regroupées (une mise à jour par tâche, même si une commande fait plusieurs opérations).
+- `npx tsx scripts/bench.ts [n]` mesure création, mise en page, déplacement et ouverture.

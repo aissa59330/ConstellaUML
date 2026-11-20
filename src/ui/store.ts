@@ -15,7 +15,16 @@ export const repo = new Repository();
 const [version, setVersion] = createSignal(0);
 /** Read inside components/effects to re-run on any model change. */
 export const modelVersion = version;
-repo.subscribe(() => setVersion(repo.version));
+// Several operations in one task (a command, a script, an import) refresh the UI once.
+let versionQueued = false;
+repo.subscribe(() => {
+  if (versionQueued) return;
+  versionQueued = true;
+  queueMicrotask(() => {
+    versionQueued = false;
+    setVersion(repo.version);
+  });
+});
 
 // ---- documents & diagrams ----------------------------------------------------
 
@@ -220,6 +229,13 @@ export function projectName(): string {
 
 /** Set by the explorer: which nodes start expanded after loading a project. */
 let expandTopLevel: ((root: Element) => void) | undefined;
+/** Builds the reverse reference index while idle, so the first drag does not pay for it. */
+function warmIndexes(): void {
+  const run = () => repo.referrers("");
+  if ("requestIdleCallback" in window) (window as unknown as { requestIdleCallback: (f: () => void) => void }).requestIdleCallback(run);
+  else setTimeout(run, 200);
+}
+
 export function onProjectLoaded(fn: (root: Element) => void): void {
   expandTopLevel = fn;
 }
@@ -244,6 +260,7 @@ function loadRoot(root: Element, path: string | null): void {
     if (first) openDiagram(first._id);
     expandTopLevel?.(root);
     setVersion(repo.version);
+    warmIndexes();
   });
 }
 

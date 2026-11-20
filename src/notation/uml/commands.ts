@@ -475,16 +475,17 @@ export function editFlow(repo: Repository, flow: Element, expression: string): v
   });
 }
 
-export type FeatureKind = "attributes" | "operations" | "literals" | "receptions";
+export type FeatureKind = "attributes" | "operations" | "literals" | "receptions" | "templateParameters";
 
 const FEATURE_TYPE: Record<FeatureKind, string> = {
   attributes: "UMLAttribute",
   operations: "UMLOperation",
   literals: "UMLEnumerationLiteral",
   receptions: "UMLReception",
+  templateParameters: "UMLTemplateParameter",
 };
 
-const FEATURE_BASE: Record<FeatureKind, string> = { attributes: "attribute", operations: "operation", literals: "literal", receptions: "reception" };
+const FEATURE_BASE: Record<FeatureKind, string> = { attributes: "attribute", operations: "operation", literals: "literal", receptions: "reception", templateParameters: "T" };
 
 /** Adds a feature (optionally parsed from quick-edit text) after `afterIndex`. */
 export function addFeature(repo: Repository, owner: Element, kind: FeatureKind, expression?: string, afterIndex?: number): Element {

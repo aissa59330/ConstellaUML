@@ -107,9 +107,9 @@
 - [x] DG-009 (P1) Création d'éléments depuis la Toolbox (clic-glisser pour la taille) ; création d'un Texte par double-clic sur fond vide
 - [x] DG-010 (P1) **Quick-edit** au double-clic ou `Entrée` (voir §5.1) ; `Maj+Entrée` = nouvelle ligne dans les textes
 - [x] DG-011 (P1) Copier/couper/coller de vues, **y compris entre diagrammes** ; copier/coller d'éléments du modèle dans l'explorateur
-- [~] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…)
+- [~] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…) — avec **Ajouter ▸** (paramètre de template, attribut, port, opération, réception, classe…) et **Ajouter un diagramme ▸** selon l'élément cliqué
 - [ ] DG-013 (P2) Glisser-déposer d'une image sur le diagramme
-- [ ] DG-014 (P1) Rendu fluide : 60 fps en déplacement avec 500 éléments, ouverture < 1 s pour un projet de 5 000 éléments
+- [~] DG-014 (P1) Rendu fluide : 60 fps en déplacement avec 500 éléments, ouverture < 1 s pour un projet de 5 000 éléments — mesuré (version web, canvas réel) : déplacement 1 à 4 ms par image avec 500 classes et 500 associations, ouverture + mise en page de 21 000 éléments (23 Mo) en 0,3 s ; reste à confirmer dans l'app native
 
 ### 4.5 Mise en forme (menu Format)
 - [~] FMT-001 (P1) Police (`Ctrl+Shift+F`), couleur de remplissage (`Ctrl+Shift+I`), couleur de ligne (`Ctrl+Shift+L`)
@@ -157,6 +157,7 @@
 - [ ] QE-004 (P1) Paramètre de template : `[<<st>>] [vis] nom [: type] [= défaut]`
 - [~] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`) — ajout testé ; suppression et réordonnancement à valider
 - [~] QE-006 (P1) Quick-edit des extrémités d'association (nom, multiplicité, navigabilité, agrégation)
+- [~] QE-007 (P1) Barre d'édition rapide (comme StarUML) : bouton **Visibilité** (public / protected / private / package) à gauche ; à droite, ajouter attribut / opération / réception / paramètre de template / littéral, et créer une superclasse, une sous-classe, une interface fournie ou requise, une classe associée, agrégée ou composée (placée sans chevauchement, nom directement en saisie) ; sur un attribut ou une opération : ajouter, monter, descendre, supprimer
 
 ### 5.2 Classes (P1)
 - [x] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux) — interface aussi en « lollipop » (affichage icône)
@@ -289,7 +290,7 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 - [x] QA-001 Tests unitaires : métamodèle, opérations/undo, sérialisation `.mdj` (aller-retour sur des fichiers réels), quick-edit, générateurs, parseurs (Vitest)
 - [ ] QA-002 Corpus de fichiers `.mdj` de référence (exemples open source + fichiers générés), avec un test de non-régression par fichier — *partiel* : 1 fichier de référence
 - [ ] QA-003 Tests E2E de l'interface (Playwright sur le frontend, `tauri-driver` pour les tests de fumée)
-- [ ] QA-004 Benchmarks de performance (DG-014) dans la CI
+- [ ] QA-004 Benchmarks de performance (DG-014) dans la CI — *partiel* : `scripts/bench.ts` et un test de non-régression (mise en page d'un déplacement sur 500 classes) ; pas encore de CI
 - [ ] PKG-L1 (P4) AppImage
 - [ ] PKG-L2 (P4) `.deb`
 - [ ] PKG-L3 (P4) `.rpm`

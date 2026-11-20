@@ -5,7 +5,14 @@ import { meta } from "../core/meta/registry";
 import { DiagramEditor } from "../editor/DiagramEditor";
 import {
   type FeatureKind,
+  type LinkKind,
+  DIAGRAM_TYPES,
+  FEATURE_LISTS,
+  addDiagram,
   addFeature,
+  addModelElement,
+  addableTypes,
+  addLinkedClassifier,
   deleteFromModel,
   editAttribute,
   editEntity,
@@ -25,10 +32,12 @@ import {
 import type { Rect } from "../render/graphics";
 import { transitionLabel } from "../notation/uml/phase2-views";
 import { setZoomTick, zoomTick } from "./Chrome";
-import { DIAGRAM_CONTEXT_MENU, applyPainter, dropModelOnDiagram, setActiveEditor } from "./commands";
+import { DIAGRAM_CONTEXT_MENU, type MenuItem, applyPainter, dropModelOnDiagram, register, setActiveEditor } from "./commands";
+import { revealInExplorer } from "./Explorer";
 import { t } from "./i18n";
 import { Icon } from "./icons";
 import { ContextMenu } from "./Menu";
+import { QuickEditBar, type QuickEditActions } from "./QuickEditBar";
 import * as s from "./store";
 
 interface QuickEditState {
@@ -108,6 +117,20 @@ export function DiagramArea() {
   const [menu, setMenu] = createSignal<{ x: number; y: number } | null>(null);
   const viewports = new Map<string, { zoom: number; scroll: { x: number; y: number } }>();
 
+  // The minimap redraws the whole diagram: at most a few times per second, after the last change.
+  let thumbTimer = 0;
+  let thumbLast = 0;
+  const scheduleThumbnail = () => {
+    if (thumbTimer) return;
+    const wait = Math.max(0, 200 - (performance.now() - thumbLast));
+    thumbTimer = window.setTimeout(() => {
+      thumbTimer = 0;
+      thumbLast = performance.now();
+      if (minimap && s.panels().minimap) editor?.thumbnail(minimap);
+    }, wait);
+  };
+  onCleanup(() => clearTimeout(thumbTimer));
+
   onMount(() => {
     editor = new DiagramEditor(canvas, {
       repo: s.repo,
@@ -147,11 +170,11 @@ export function DiagramArea() {
     s.showGrid();
     s.tool();
     editor?.requestRender();
-    if (s.panels().minimap) queueMicrotask(() => minimap && editor?.thumbnail(minimap));
+    if (s.panels().minimap) scheduleThumbnail();
   });
   createEffect(() => {
     zoomTick();
-    if (s.panels().minimap && minimap) editor?.thumbnail(minimap);
+    if (s.panels().minimap) scheduleThumbnail();
   });
 
   // Keep one viewport per diagram tab.
@@ -206,6 +229,125 @@ export function DiagramArea() {
     }
   };
 
+  const moveFeature = (delta: -1 | 1) => {
+    const state = qe();
+    if (!state) return;
+    commit();
+    const f = s.repo.deref(state.view.model);
+    if (f) moveInParent(s.repo, f, delta);
+  };
+
+  const removeFeature = () => {
+    const state = qe();
+    if (!state) return;
+    setQe(null);
+    const f = s.repo.deref(state.view.model);
+    if (f) deleteFromModel(s.repo, [f]);
+    canvas.focus();
+  };
+
+  /** Right-click menu: "Add ▸" / "Add Diagram ▸" for the clicked element, then the usual entries. */
+  const contextItems = (): MenuItem[] => {
+    const view = s.selection().find((e) => meta.isKindOf(e._type, "View"));
+    const model = view && s.repo.deref(view.model);
+    if (!model) return DIAGRAM_CONTEXT_MENU;
+    const items: MenuItem[] = [];
+    const types = addableTypes(model).filter((type) => type !== "Tag");
+    if (types.length)
+      items.push({
+        label: "cmd.model.add",
+        children: types.map((type) => {
+          const id = `diagram:add-${type}`;
+          register({
+            id,
+            label: `type.${type}`,
+            run: () => {
+              const target = s.repo.deref(s.selection().find((e) => meta.isKindOf(e._type, "View"))?.model);
+              if (!target) return;
+              const kind = FEATURE_LISTS[type];
+              // Features appear in the view: create and edit them in place.
+              if (kind && meta.isKindOf(target._type, "UMLClassifier")) {
+                const el = addFeature(s.repo, target, kind);
+                editor.render();
+                const fv = s.repo.viewsOf(el._id).find((v) => isFeatureView(v) && s.repo.diagramOf(v)?._id === s.activeDiagramId());
+                if (fv) {
+                  s.select([fv]);
+                  editor.startQuickEdit(fv);
+                  return;
+                }
+                s.select([el]);
+                return;
+              }
+              const el = addModelElement(s.repo, target, type);
+              revealInExplorer(el);
+              s.select([el]);
+            },
+          });
+          return { cmd: id };
+        }),
+      });
+    if (meta.containerField(model._type, "UMLClassDiagram"))
+      items.push({
+        label: "cmd.model.addDiagram",
+        children: DIAGRAM_TYPES.map(({ type }) => {
+          const id = `diagram:add-diagram-${type}`;
+          register({
+            id,
+            label: `diagram.${type}`,
+            run: () => {
+              const target = s.repo.deref(s.selection().find((e) => meta.isKindOf(e._type, "View"))?.model);
+              if (!target) return;
+              const d = addDiagram(s.repo, target, type);
+              revealInExplorer(d);
+              s.openDiagram(d._id);
+            },
+          });
+          return { cmd: id };
+        }),
+      });
+    return items.length ? [...items, { sep: true }, ...DIAGRAM_CONTEXT_MENU] : DIAGRAM_CONTEXT_MENU;
+  };
+
+  /** Buttons of the quick-edit bar. */
+  const qeActions: QuickEditActions = {
+    visibility(v) {
+      const state = qe();
+      const model = state && s.repo.deref(state.view.model);
+      if (!state || !model) return;
+      const input = document.getElementById("quick-edit-input") as HTMLTextAreaElement | null;
+      try {
+        // Keep what was typed, then change the visibility and show the updated text.
+        if (input && input.value !== state.text) applyQuickEdit(state.view, input.value);
+        setField(s.repo, model, "visibility", v);
+        const next = quickEditTarget(state.view);
+        if (next) {
+          setQe({ ...state, ...next });
+          if (input) input.value = next.text;
+        }
+        setQeError(null);
+      } catch (e) {
+        setQeError(e instanceof Error ? e.message : String(e));
+      }
+    },
+    add: (kind) => commit(kind),
+    link(kind: LinkKind) {
+      const state = qe();
+      const d = s.activeDiagram();
+      if (!state || !d) return;
+      commit();
+      try {
+        const view = addLinkedClassifier(s.repo, d, state.view, kind);
+        editor.render();
+        s.select([view]);
+        editor.startQuickEdit(view);
+      } catch (e) {
+        s.reportError(e);
+      }
+    },
+    move: moveFeature,
+    remove: removeFeature,
+  };
+
   const onQeKey = (e: KeyboardEvent) => {
     const state = qe();
     if (!state) return;
@@ -222,15 +364,10 @@ export function DiagramArea() {
       commit();
     } else if (isFeatureView(state.view) && (e.ctrlKey || e.metaKey) && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
       e.preventDefault();
-      commit();
-      const f = s.repo.deref(state.view.model);
-      if (f) moveInParent(s.repo, f, e.key === "ArrowUp" ? -1 : 1);
+      moveFeature(e.key === "ArrowUp" ? -1 : 1);
     } else if (isFeatureView(state.view) && (e.ctrlKey || e.metaKey) && e.key === "Delete") {
       e.preventDefault();
-      setQe(null);
-      const f = s.repo.deref(state.view.model);
-      if (f) deleteFromModel(s.repo, [f]);
-      canvas.focus();
+      removeFeature();
     }
   };
 
@@ -348,6 +485,9 @@ export function DiagramArea() {
                 onBlur={() => qe() && !qeError() && commit()}
               />
               <div class="quick-edit-hint">{qeError() ?? t("quickedit.hint")}</div>
+              <Show when={(s.modelVersion(), s.repo.deref(state().view.model))}>
+                {(model) => <QuickEditBar model={model()} isFeature={isFeatureView(state().view)} actions={qeActions} />}
+              </Show>
             </div>
           )}
         </Show>
@@ -355,7 +495,7 @@ export function DiagramArea() {
           <canvas ref={minimap} class="minimap" onPointerDown={onMinimap} aria-label={t("cmd.view.minimap")} />
         </Show>
       </div>
-      <Show when={menu()}>{(m) => <ContextMenu x={m().x} y={m().y} items={DIAGRAM_CONTEXT_MENU} onClose={() => setMenu(null)} />}</Show>
+      <Show when={menu()}>{(m) => <ContextMenu x={m().x} y={m().y} items={contextItems()} onClose={() => setMenu(null)} />}</Show>
     </div>
   );
 }

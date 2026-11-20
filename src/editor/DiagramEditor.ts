@@ -192,7 +192,7 @@ export class DiagramEditor {
     const g = new CanvasGraphics(c);
     const ctx = { ...this.renderCtx, g };
     arrangeDiagram(d, ctx);
-    drawDiagram(d, ctx);
+    drawDiagram(d, ctx, this.visibleRect());
     this.drawSelection(c, theme);
     this.drawDragFeedback(c, theme);
   }

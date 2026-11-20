@@ -113,8 +113,10 @@ export function ensureSub(repo: Repository, owner: Element, field: string, type:
   if (existing && Array.isArray(owner.subViews) && owner.subViews.includes(existing)) return existing;
   const sub = create(type, { _parent: { $ref: owner._id }, ...init });
   (owner.subViews ??= []).push(sub);
+  const before = owner[field];
   owner[field] = { $ref: sub._id };
   repo.registerDerived(sub);
+  repo.reindexRefs(owner, { [field]: before });
   return sub;
 }
 
@@ -140,3 +142,37 @@ export function setBounds(v: Element, r: Rect): void {
   v.width = Math.round(r.w);
   v.height = Math.round(r.h);
 }
+
+// ---- layout epochs ------------------------------------------------------------------
+// Layout caches (routes, ports…) stay valid while only geometry changes: moving or
+// resizing views only re-lays out those views and their edges. Any other change
+// (content, style, structure) starts a new epoch and a full layout.
+
+const GEOMETRY = new Set(["left", "top", "width", "height", "points"]);
+
+export interface LayoutState {
+  epoch: number;
+  /** Ids of views whose geometry changed since they were last laid out. */
+  moved: Set<string>;
+}
+
+const layoutStates = new WeakMap<Repository, LayoutState>();
+
+export function layoutState(repo: Repository): LayoutState {
+  let st = layoutStates.get(repo);
+  if (!st) {
+    const state: LayoutState = { epoch: 1, moved: new Set() };
+    repo.subscribe(({ op }) => {
+      const geometric = op.changes.length > 0 && op.changes.every((c) => c.kind === "set" && GEOMETRY.has(c.field));
+      if (geometric) for (const c of op.changes) state.moved.add((c as { id: string }).id);
+      else {
+        state.epoch++;
+        state.moved.clear();
+      }
+    });
+    layoutStates.set(repo, (st = state));
+  }
+  return st;
+}
+
+export const layoutEpoch = (repo: Repository): number => layoutState(repo).epoch;

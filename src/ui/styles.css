@@ -1393,3 +1393,72 @@ textarea.field-input {
     max-height: 40vh;
   }
 }
+
+/* ---- quick-edit bar (visibility, add buttons) ------------------------------- */
+.qe-left,
+.qe-right {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 4px;
+}
+.qe-left {
+  right: calc(100% + 6px);
+  flex-direction: column;
+}
+.qe-right {
+  left: calc(100% + 6px);
+  flex-direction: column;
+  width: max-content;
+}
+.qe-group {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  box-shadow: var(--shadow);
+}
+.qe-left > .qe-button {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.qe-button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.qe-button:hover {
+  background: var(--surface-3);
+}
+.qe-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  min-width: 140px;
+  padding: 4px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  box-shadow: var(--shadow);
+  z-index: 30;
+}
+.qe-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.qe-menu .menu-item.on {
+  background: var(--accent-soft);
+}

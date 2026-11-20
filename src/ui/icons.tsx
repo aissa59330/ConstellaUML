@@ -195,6 +195,65 @@ const P: Record<string, () => JSX.Element> = {
       <path d="M8 5v6" />
     </>
   ),
+  visPublic: () => (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M8 5.5v5M5.5 8h5" />
+    </>
+  ),
+  visProtected: () => (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M6.5 5l-1 6M10.5 5l-1 6M5 7h6.5M4.5 9.5h6.5" />
+    </>
+  ),
+  visPrivate: () => (
+    <>
+      <rect x="3.5" y="7" width="9" height="6.5" rx="1" />
+      <path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" />
+    </>
+  ),
+  visPackage: () => (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M5 9c1-2 2-2 3 0s2 2 3 0" />
+    </>
+  ),
+  templateParameter: () => (
+    <>
+      <rect x="2" y="5" width="9" height="9" rx="1" />
+      <rect x="8" y="2" width="6" height="5" stroke-dasharray="2 1.5" />
+    </>
+  ),
+  reception: () => (
+    <>
+      <path d="M2 4h8l3 4-3 4H2l3-4z" />
+    </>
+  ),
+  superclass: () => (
+    <>
+      <rect x="4.5" y="1.5" width="7" height="4" />
+      <path d="M8 14V8.5M5.5 9L8 5.5 10.5 9z" />
+    </>
+  ),
+  subclass: () => (
+    <>
+      <rect x="4.5" y="10.5" width="7" height="4" />
+      <path d="M8 10.5V5M5.5 5L8 1.5 10.5 5z" />
+    </>
+  ),
+  providedInterface: () => (
+    <>
+      <path d="M2 8h7" />
+      <circle cx="11.5" cy="8" r="2.5" />
+    </>
+  ),
+  requiredInterface: () => (
+    <>
+      <path d="M2 8h7" />
+      <path d="M13 4.5a3.5 3.5 0 000 7" />
+    </>
+  ),
   diagram: () => (
     <>
       <rect x="2" y="2" width="12" height="12" rx="1.5" />
