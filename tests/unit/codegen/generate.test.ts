@@ -17,6 +17,9 @@ const file = (files: VirtualFile[], path: string) => {
   return f.content;
 };
 
+// Tests that run a real compiler or interpreter: slow to start on CI machines.
+const COMPILER_TIMEOUT = 60_000;
+
 function has(cmd: string): boolean {
   try {
     execFileSync("sh", ["-c", `command -v ${cmd}`], { stdio: "ignore" });
@@ -67,8 +70,10 @@ describe("code generation", () => {
     const files = gen("cpp");
     expect(files.some((f) => f.path === "shop/domain/Book.cpp")).toBe(true);
     const dir = writeAll(files);
-    for (const f of files.filter((x) => x.path.endsWith(".cpp"))) execFileSync("g++", ["-std=c++17", "-fsyntax-only", "-I", dir, join(dir, f.path)], { stdio: "pipe" });
-  });
+    // One g++ run for all files: each start is slow on Windows (MinGW).
+    const sources = files.filter((x) => x.path.endsWith(".cpp")).map((f) => join(dir, f.path));
+    execFileSync("g++", ["-std=c++17", "-fsyntax-only", "-I", dir, ...sources], { stdio: "pipe" });
+  }, COMPILER_TIMEOUT);
 
   it.runIf(has("python3"))("Python output imports and runs", () => {
     const files = gen("python");
@@ -78,7 +83,7 @@ describe("code generation", () => {
     const dir = writeAll(files);
     const out = execFileSync("python3", ["-c", "from shop.domain.book import Book; b = Book(); print(b.isbn, Book.count)"], { cwd: dir, encoding: "utf8" });
     expect(out.trim()).toBe("None 0");
-  });
+  }, COMPILER_TIMEOUT);
 
   it("TypeScript output type-checks", () => {
     const files = gen("typescript");
@@ -89,14 +94,14 @@ describe("code generation", () => {
     const dir = writeAll(files);
     // Run from the output folder so the project's own tsconfig.json is not involved.
     execFileSync(process.execPath, [join(process.cwd(), "node_modules/typescript/bin/tsc"), "--noEmit", "--strict", "--target", "es2020", ...files.map((f) => f.path)], { cwd: dir, stdio: "pipe" });
-  });
+  }, COMPILER_TIMEOUT);
 
   it.runIf(has("php"))("PHP output passes php -l", () => {
     const files = gen("php");
     expect(file(files, "shop/domain/Book.php")).toContain("namespace shop\\domain;");
     const dir = writeAll(files);
     for (const f of files) execFileSync("php", ["-l", join(dir, f.path)], { stdio: "pipe" });
-  });
+  }, COMPILER_TIMEOUT);
 
   it("indentation and documentation options", () => {
     const { repo, model } = shopModel();
