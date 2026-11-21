@@ -1,4 +1,4 @@
-# ConstellaUML — Cahier des charges & checklist des fonctionnalités
+# ConstellaUML - Cahier des charges & checklist des fonctionnalités
 
 > Outil de modélisation UML desktop pour Linux (voir aussi [LICENSES.md](LICENSES.md)).
 > Nom de travail : **ConstellaUML** (les modèles sont des étoiles, les relations des constellations).
@@ -12,7 +12,7 @@
 
 ## Légende
 
-- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (test automatisé + essai dans l'app) · `[~]` implémenté et testé en partie (tests automatisés et/ou version web), **en attente de vérification dans l'application native** — il ne passera en `[x]` qu'après
+- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (test automatisé + essai dans l'app) · `[~]` implémenté et testé en partie (tests automatisés et/ou version web), **en attente de vérification dans l'application native** - il ne passera en `[x]` qu'après
 - Une note *partiel* indique ce qui manque encore dans la ligne.
 - **P1…P4** : phase cible · ⭐ : fonctionnalité avancée
 - Chaque ligne a un identifiant stable (`UI-012`) utilisé dans les commits et les tests.
@@ -27,30 +27,30 @@
 - [x] CORE-004 (P1) Undo/redo illimité de **toute** modification (modèle, vue, style, diagrammes)
 - [x] CORE-005 (P1) Identifiants stables (`_id`) et références `{"$ref": id}` comme dans `.mdj`
 - [ ] CORE-006 (P2) Profils UML (UML Standard Profile v2 applicable via Modèle ▸ Appliquer un profil)
-- [ ] CORE-007 (P1) Stéréotypes (choisis depuis un profil ou saisis librement), contraintes, tags (`string`, `reference`, `boolean`, `number`, `hidden`) — *partiel* : stéréotypes libres, tags, contraintes ; manque le choix depuis un profil
+- [ ] CORE-007 (P1) Stéréotypes (choisis depuis un profil ou saisis librement), contraintes, tags (`string`, `reference`, `boolean`, `number`, `hidden`) - *partiel* : stéréotypes libres, tags, contraintes ; manque le choix depuis un profil
 - [~] CORE-008 (P1) Documentation de chaque élément (Markdown)
-- [~] CORE-009 (P2) Fragments `.mfj` : export de n'importe quel élément / import sous le projet — export/import de fragment `.mfj` déjà disponibles
+- [~] CORE-009 (P2) Fragments `.mfj` : export de n'importe quel élément / import sous le projet - export/import de fragment `.mfj` déjà disponibles
 
 ## 2. Gestion de projet & fichiers
 
 - [~] FILE-001 (P1) Nouveau (`Ctrl+N`), Ouvrir (`Ctrl+O`), Enregistrer (`Ctrl+S`), Enregistrer sous (`Ctrl+Shift+S`), Fermer (avec demande d'enregistrement)
-- [~] FILE-002 (P1) Lecture/écriture `.mdj` (aller-retour sans perte, types inconnus conservés tels quels) — aller-retour sans perte testé
+- [~] FILE-002 (P1) Lecture/écriture `.mdj` (aller-retour sans perte, types inconnus conservés tels quels) - aller-retour sans perte testé
 - [~] FILE-003 (P1) Fichiers récents
-- [~] FILE-004 (P1) Autosave + récupération après crash — récupération testée en version web
+- [~] FILE-004 (P1) Autosave + récupération après crash - récupération testée en version web
 - [ ] FILE-005 (P2) Nouveau depuis un modèle : UML minimal, UML conventionnel, 4+1, Rational, Data Model, BPMN, C4, Wireframe
-- [~] FILE-006 (P2) Export/import de fragment `.mfj` — export/import disponibles (P1 au lieu de P2)
+- [~] FILE-006 (P2) Export/import de fragment `.mfj` - export/import disponibles (P1 au lieu de P2)
 - [~] FILE-007 (P1) Couleurs « variables » (`$background`, `$foreground`, `$transparent`, `$<teinte><1..12>`) + conversion à l'ouverture des anciens fichiers (garder/convertir)
 - [ ] FILE-008 (P4) Export à l'ancien format `.mdj` (couleurs variables remplacées par les couleurs du thème clair)
 - [ ] FILE-009 (P4) Import/Export XMI 2.1 (éléments du modèle uniquement)
-- [ ] FILE-010 (P4) Import de l'ancien format `.uml` — *optionnel, faible priorité*
+- [ ] FILE-010 (P4) Import de l'ancien format `.uml` - *optionnel, faible priorité*
 - [x] FILE-011 (P1) ⭐ Sauvegarde **diff-friendly** : JSON trié de façon déterministe, indenté, retours à la ligne stables (option activée par défaut)
 - [~] FILE-012 (P1) Ouverture d'un fichier passé en argument / association MIME `.mdj` sous Linux
 
 ## 3. Export
 
-- [~] EXP-001 (P1) Boîte « Exporter l'image » (`Ctrl+Shift+E`) : portée (diagramme courant / tous), format PNG/JPEG/SVG, fond rempli, échelle 1x/2x, marge 0–32 px, Exporter / Tout exporter (dossier) / Copier dans le presse-papiers ; options mémorisées — JPEG inclus ; export testé (PNG/SVG/JPEG encodés), boîte non testée en natif
+- [~] EXP-001 (P1) Boîte « Exporter l'image » (`Ctrl+Shift+E`) : portée (diagramme courant / tous), format PNG/JPEG/SVG, fond rempli, échelle 1x/2x, marge 0–32 px, Exporter / Tout exporter (dossier) / Copier dans le presse-papiers ; options mémorisées - JPEG inclus ; export testé (PNG/SVG/JPEG encodés), boîte non testée en natif
 - [x] EXP-002 (P1) PNG et SVG (phase 1), JPEG (P2)
-- [~] EXP-003 (P1) Copier le diagramme en image (`Ctrl+Shift+C`) — dépend du presse-papiers d'images de WebKitGTK
+- [~] EXP-003 (P1) Copier le diagramme en image (`Ctrl+Shift+C`) - dépend du presse-papiers d'images de WebKitGTK
 - [ ] EXP-004 (P2) Imprimer en PDF : portée, orientation, format de page (A0…A10, B, C, Letter, Legal, Tabloid…), nom du diagramme en en-tête
 - [ ] EXP-005 (P3) Documentation HTML (arbre du modèle, pages par élément, images des diagrammes, documentation)
 - [ ] EXP-006 (P3) Documentation Markdown
@@ -64,8 +64,8 @@
 - [x] UI-003 (P1) Zone diagramme avec **onglets** multi-diagrammes
 - [x] UI-004 (P1) Navigateur à droite (`Ctrl+2`) : Model Explorer + éditeurs (`Ctrl+6`)
 - [x] UI-005 (P1) Barre d'outils (`Ctrl+3`), barre d'état (`Ctrl+4`) : chemin de l'élément, résultats de validation, bouton thème, zoom
-- [ ] UI-006 (P2) Panneau inférieur à onglets : Résultats de recherche, Validation, Miniatures (`Ctrl+Alt+T`), Documentation Markdown (`Ctrl+Alt+D`), Relations (`Ctrl+Alt+R`), Console de script (`Ctrl+Alt+J`) — *partiel* : seul le panneau « Résultats de recherche » existe
-- [x] UI-007 (P1) **Responsive** : panneaux redimensionnables, repliables ; repli automatique sous ~1100 px, menus en débordement, utilisable à partir de 1024×600 jusqu'au 4K — testé à 1024×600, 1440×860 et ~600 px (toolbox en icônes, navigateur en surimpression)
+- [ ] UI-006 (P2) Panneau inférieur à onglets : Résultats de recherche, Validation, Miniatures (`Ctrl+Alt+T`), Documentation Markdown (`Ctrl+Alt+D`), Relations (`Ctrl+Alt+R`), Console de script (`Ctrl+Alt+J`) - *partiel* : seul le panneau « Résultats de recherche » existe
+- [x] UI-007 (P1) **Responsive** : panneaux redimensionnables, repliables ; repli automatique sous ~1100 px, menus en débordement, utilisable à partir de 1024×600 jusqu'au 4K - testé à 1024×600, 1440×860 et ~600 px (toolbox en icônes, navigateur en surimpression)
 - [~] UI-008 (P1) Disposition des panneaux mémorisée
 
 ### 4.2 Model Explorer
@@ -84,24 +84,24 @@
 - [x] ED-003 (P1) Éditeur de documentation **Markdown** avec aperçu
 - [~] ED-004 (P1) Éditeur inline d'attributs / opérations / littéraux / paramètres de template
 - [ ] ED-005 (P2) Éditeur de tags (`Ctrl+T`) : attributs du stéréotype + tags libres
-- [~] ED-006 (P1) Boîtes : Police, Couleur (palette de variables + `#rrggbb`), Sélecteur d'élément, Sélecteur dans une liste, Éditeur de liste d'éléments — *partiel* : police, couleur ; sélecteurs d'éléments simplifiés (liste)
+- [~] ED-006 (P1) Boîtes : Police, Couleur (palette de variables + `#rrggbb`), Sélecteur d'élément, Sélecteur dans une liste, Éditeur de liste d'éléments - *partiel* : police, couleur ; sélecteurs d'éléments simplifiés (liste)
 - [ ] ED-007 (P2) Préférences (schémas à gauche, réinitialisation par défaut)
 
 ### 4.4 Éditeur de diagramme
 - [~] DG-001 (P1) Défilement molette / Maj+molette / bouton du milieu / `Ctrl`+glisser
-- [~] DG-002 (P1) Zoom `Ctrl++`, `Ctrl+-`, `Ctrl+0` (taille réelle), `Ctrl+9` (ajuster), `Ctrl`+molette ; niveau affiché dans la barre d'état — molette + Ctrl, raccourcis, barre d'état
+- [~] DG-002 (P1) Zoom `Ctrl++`, `Ctrl+-`, `Ctrl+0` (taille réelle), `Ctrl+9` (ajuster), `Ctrl`+molette ; niveau affiché dans la barre d'état - molette + Ctrl, raccourcis, barre d'état
 - [~] DG-003 (P1) Minimap (`Ctrl+Alt+M`), clic pour naviguer
 - [~] DG-004 (P1) Sélection : clic, Maj+clic, rectangle (+Maj), `Ctrl+A`, `Échap` = outil sélection
 - [~] DG-005 (P1) Déplacement : flèches = 1 px, Maj+flèches = pas de grille
 - [~] DG-006 (P1) Grille (`Ctrl+G`), magnétisme (`Ctrl+Shift+G`)
 - [~] DG-007 (P1) Redimensionnement par poignées ; redimensionnement automatique (`Ctrl+Shift+R`)
-- [~] DG-008 (P1) Liens : création par glisser source→cible, points intermédiaires, reconnexion des extrémités, étiquettes déplaçables — création, reconnexion des extrémités, points intermédiaires (oblique/courbe), étiquettes déplaçables ; les liens rectilignes sont routés automatiquement
+- [~] DG-008 (P1) Liens : création par glisser source→cible, points intermédiaires, reconnexion des extrémités, étiquettes déplaçables - création, reconnexion des extrémités, points intermédiaires (oblique/courbe), étiquettes déplaçables ; les liens rectilignes sont routés automatiquement
 - [x] DG-009 (P1) Création d'éléments depuis la Toolbox (clic-glisser pour la taille) ; création d'un Texte par double-clic sur fond vide
 - [x] DG-010 (P1) **Quick-edit** au double-clic ou `Entrée` (voir §5.1) ; `Maj+Entrée` = nouvelle ligne dans les textes
 - [x] DG-011 (P1) Copier/couper/coller de vues, **y compris entre diagrammes** ; copier/coller d'éléments du modèle dans l'explorateur
-- [~] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…) — avec **Ajouter ▸** (paramètre de template, attribut, port, opération, réception, classe…) et **Ajouter un diagramme ▸** selon l'élément cliqué
+- [~] DG-012 (P1) Menu contextuel du diagramme (Format, Alignement, Supprimer, Supprimer du modèle, Sélectionner dans l'explorateur…) - avec **Ajouter ▸** (paramètre de template, attribut, port, opération, réception, classe…) et **Ajouter un diagramme ▸** selon l'élément cliqué
 - [ ] DG-013 (P2) Glisser-déposer d'une image sur le diagramme
-- [~] DG-014 (P1) Rendu fluide : 60 fps en déplacement avec 500 éléments, ouverture < 1 s pour un projet de 5 000 éléments — mesuré (version web, canvas réel) : déplacement 1 à 4 ms par image avec 500 classes et 500 associations, ouverture + mise en page de 21 000 éléments (23 Mo) en 0,3 s ; reste à confirmer dans l'app native
+- [~] DG-014 (P1) Rendu fluide : 60 fps en déplacement avec 500 éléments, ouverture < 1 s pour un projet de 5 000 éléments - mesuré (version web, canvas réel) : déplacement 1 à 4 ms par image avec 500 classes et 500 associations, ouverture + mise en page de 21 000 éléments (23 Mo) en 0,3 s ; reste à confirmer dans l'app native
 
 ### 4.5 Mise en forme (menu Format)
 - [~] FMT-001 (P1) Police (`Ctrl+Shift+F`), couleur de remplissage (`Ctrl+Shift+I`), couleur de ligne (`Ctrl+Shift+L`)
@@ -136,7 +136,7 @@
 - [ ] THM-004 (P2) Polices personnalisées (`~/.config/constella/fonts/<police>/font.json`)
 
 ### 4.9 Raccourcis clavier
-- [~] KEY-001 (P1) Tous les raccourcis listés dans [docs/keymap.md](docs/keymap.md) (69 commandes + raccourcis contextuels), testés automatiquement — tous les raccourcis des fonctions de la phase 1 vérifiés par test ; restent ceux des fonctions des phases suivantes
+- [~] KEY-001 (P1) Tous les raccourcis listés dans [docs/keymap.md](docs/keymap.md) (69 commandes + raccourcis contextuels), testés automatiquement - tous les raccourcis des fonctions de la phase 1 vérifiés par test ; restent ceux des fonctions des phases suivantes
 
 ---
 
@@ -144,32 +144,32 @@
 
 ### 5.1 Quick-edit (commun)
 - [x] QE-001 (P1) Nom : `[<<stéréotype>>] [visibilité] nom` (visibilités `+ # - ~`)
-- [x] QE-002 (P1) Attribut : `[<<st>>] [vis] nom [: type] [[multiplicité]] [= défaut]` — ex. `+nom: String [0..1] = "x"`
+- [x] QE-002 (P1) Attribut : `[<<st>>] [vis] nom [: type] [[multiplicité]] [= défaut]` - ex. `+nom: String [0..1] = "x"`
 - [x] QE-003 (P1) Opération : `[<<st>>] [vis] nom [(params)] [: retour]`
 - [ ] QE-004 (P1) Paramètre de template : `[<<st>>] [vis] nom [: type] [= défaut]`
-- [~] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`) — ajout testé ; suppression et réordonnancement à valider
+- [~] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`) - ajout testé ; suppression et réordonnancement à valider
 - [~] QE-006 (P1) Quick-edit des extrémités d'association (nom, multiplicité, navigabilité, agrégation)
 - [~] QE-007 (P1) Barre d'édition rapide : bouton **Visibilité** (public / protected / private / package) à gauche ; à droite, ajouter attribut / opération / réception / paramètre de template / littéral, et créer une superclasse, une sous-classe, une interface fournie ou requise, une classe associée, agrégée ou composée (placée sans chevauchement, nom directement en saisie) ; sur un attribut ou une opération : ajouter, monter, descendre, supprimer
 
 ### 5.2 Classes (P1)
-- [x] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux) — interface aussi en « lollipop » (affichage icône)
-- [ ] CLS-002 Attributs, opérations, paramètres, réceptions, paramètres de template, substitution de template, template binding — *partiel* : attributs, opérations, paramètres, réceptions, paramètres de template (affichage) ; manquent substitution et template binding
-- [ ] CLS-003 Généralisation, Association (navigabilité, ordre des extrémités, propriété *ownership*, agrégation, composition), association n-aire, Dépendance, Réalisation d'interface, Classe d'association — *partiel* : généralisation, association (navigabilité, agrégation, composition), dépendance, réalisation, réalisation d'interface ; manquent association n-aire, classe d'association, ordre des extrémités
+- [x] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux) - interface aussi en « lollipop » (affichage icône)
+- [ ] CLS-002 Attributs, opérations, paramètres, réceptions, paramètres de template, substitution de template, template binding - *partiel* : attributs, opérations, paramètres, réceptions, paramètres de template (affichage) ; manquent substitution et template binding
+- [ ] CLS-003 Généralisation, Association (navigabilité, ordre des extrémités, propriété *ownership*, agrégation, composition), association n-aire, Dépendance, Réalisation d'interface, Classe d'association - *partiel* : généralisation, association (navigabilité, agrégation, composition), dépendance, réalisation, réalisation d'interface ; manquent association n-aire, classe d'association, ordre des extrémités
 - [~] CLS-004 Propriétés : abstrait, feuille, final, actif, statique, `isID`, `isReadOnly`, `isOrdered`, `isUnique`, `isDerived`, agrégation, défaut, `direction`, `isQuery`, `concurrency`, etc.
-- [ ] CLS-005 Frame (cadre de diagramme), Contraintes et Tags affichés — *partiel* : tags affichés ; manquent Frame et affichage des contraintes
-- [ ] CLS-006 Compartiments masquables, affichage abrégé, interface requise/fournie (socket/lollipop) — *partiel* : compartiments masquables, lollipop ; manque socket (interface requise)
+- [ ] CLS-005 Frame (cadre de diagramme), Contraintes et Tags affichés - *partiel* : tags affichés ; manquent Frame et affichage des contraintes
+- [ ] CLS-006 Compartiments masquables, affichage abrégé, interface requise/fournie (socket/lollipop) - *partiel* : compartiments masquables, lollipop ; manque socket (interface requise)
 
 ### 5.3 Paquetages (P2)
 - [~] PKG-001 Package, Model, Subsystem, Containment, Dépendance/Import/Merge
 
 ### 5.4 Objets (P2)
-- [ ] OBJ-001 Object, Slot, Artifact Instance, Component Instance, Node Instance, Link, Link Object — *partiel* : tout sauf Link Object
+- [ ] OBJ-001 Object, Slot, Artifact Instance, Component Instance, Node Instance, Link, Link Object - *partiel* : tout sauf Link Object
 
 ### 5.5 Structure composite (P2)
 - [~] CMP-001 Collaboration, Port, Part, Connector, Collaboration Use, Role Binding
 
 ### 5.6 Composants (P2)
-- [ ] COM-001 Component, Artifact, Component Realization, interfaces fournies/requises, ports — *partiel* : tout sauf l'interface requise (socket)
+- [ ] COM-001 Component, Artifact, Component Realization, interfaces fournies/requises, ports - *partiel* : tout sauf l'interface requise (socket)
 
 ### 5.7 Déploiement (P2)
 - [~] DEP-001 Node, Deployment, Communication Path, instances
@@ -182,31 +182,31 @@
 - [~] SEQ-002 Endpoint (messages trouvés/perdus), Gate, State Invariant, Continuation
 - [~] SEQ-003 Combined Fragment (`alt`, `opt`, `loop`, `par`, `break`, `critical`, `neg`, `assert`, `strict`, `seq`, `ignore`, `consider`) avec opérandes et gardes
 - [~] SEQ-004 Interaction Use (`ref`)
-- [ ] SEQ-005 Déplacement vertical cohérent des messages, réordonnancement automatique — *partiel* : messages déplaçables verticalement, numérotés selon leur ordre ; pas encore de renumérotation automatique au déplacement
+- [ ] SEQ-005 Déplacement vertical cohérent des messages, réordonnancement automatique - *partiel* : messages déplaçables verticalement, numérotés selon leur ordre ; pas encore de renumérotation automatique au déplacement
 
 ### 5.10 Communication (P2)
 - [~] CMU-001 Lifeline, Connector, Message (numérotés, flèches de direction)
 
 ### 5.11 Timing (P2)
-- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message — *partiel* : lifeline avec états et chronologie (`état@t; …`) et axe gradué ; modèle simplifié ; manquent contraintes et messages
+- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message - *partiel* : lifeline avec états et chronologie (`état@t; …`) et axe gradué ; modèle simplifié ; manquent contraintes et messages
 
 ### 5.12 Vue d'ensemble des interactions (P2)
 - [~] IOV-001 Interaction Use, Interaction inline, Initial, Final, Fork, Join, Merge, Decision, Control Flow
 
 ### 5.13 Activités (P2)
 - [~] ACT-001 Action, Trigger, nœuds initial/final d'activité/final de flux, Fork, Join, Merge, Decision
-- [ ] ACT-002 **Swimlanes** (partitions verticales et horizontales), Interruptible Activity Region, Structured Activity Node — *partiel* : partitions verticales seulement
+- [ ] ACT-002 **Swimlanes** (partitions verticales et horizontales), Interruptible Activity Region, Structured Activity Node - *partiel* : partitions verticales seulement
 - [~] ACT-003 Input/Output Pin, Send Signal, Accept Signal, Accept Time Event, Object Node, Central Buffer, Datastore, Activity Parameter Node
 - [~] ACT-004 Expansion Region + Input/Output Expansion Node
 - [~] ACT-005 Control Flow, Object Flow, Exception Handler, Activity Interrupt
 
 ### 5.14 Machine à états (P2)
-- [ ] STM-001 State (simple, composite, orthogonal/régions, sous-machine), Internal Activity (entry/do/exit), Internal Transition — *partiel* : états simples et composites (imbrication), entry/do/exit ; manquent régions orthogonales dessinées, sous-machine, transitions internes
+- [ ] STM-001 State (simple, composite, orthogonal/régions, sous-machine), Internal Activity (entry/do/exit), Internal Transition - *partiel* : états simples et composites (imbrication), entry/do/exit ; manquent régions orthogonales dessinées, sous-machine, transitions internes
 - [~] STM-002 Pseudo-états : Initial, Choice, Join, Fork, Junction, Shallow/Deep History, Entry/Exit Point, Terminate ; Final State ; Connection Point Reference
-- [~] STM-003 Transition (trigger [garde] / effet) — saisie rapide `déclencheur [garde] / effet`
+- [~] STM-003 Transition (trigger [garde] / effet) - saisie rapide `déclencheur [garde] / effet`
 
 ### 5.15 Profils (P2)
-- [ ] PRF-001 Profile, MetaClass, Stereotype (icône, script d'icône), Extension — *partiel* : tout sauf icône et script d'icône du stéréotype
+- [ ] PRF-001 Profile, MetaClass, Stereotype (icône, script d'icône), Extension - *partiel* : tout sauf icône et script d'icône du stéréotype
 
 ### 5.16 Flux d'informations (P2)
 - [~] INF-001 Information Item, Information Flow
@@ -223,7 +223,7 @@
 ## 7. Autres diagrammes
 
 - [~] ERD-001 (P3) **ERD/MCD** : Data Model, Entity, Column (PK, FK, référence, type, longueur, nullable, unique), Relationship (cardinalités, notation pied-de-corbeau)
-- [ ] ERD-002 (P3) ⭐ Vue MCD Merise (associations porteuses, cardinalités `0,n`/`1,1`) et passage MCD → MLD → MPD — *partiel* : passage ERD ⇄ modèle relationnel (MLD) et MLD → SQL (MPD) ; manque la vue Merise à associations porteuses
+- [ ] ERD-002 (P3) ⭐ Vue MCD Merise (associations porteuses, cardinalités `0,n`/`1,1`) et passage MCD → MLD → MPD - *partiel* : passage ERD ⇄ modèle relationnel (MLD) et MLD → SQL (MPD) ; manque la vue Merise à associations porteuses
 - [~] REL-001 (P3) ⭐ **Modèle relationnel** (MLD) : tables sur une ligne, clé primaire soulignée, clé étrangère `*`, types entre parenthèses, flèches `FK(colonnes)` ; création automatique de la colonne FK ; conversion depuis/vers l'ERD en gardant les positions
 - [~] RA-001 (P3) ⭐ **Arbre de requête** (algèbre relationnelle) : relations, opérateurs (SELECT, WHERE, JOIN…, notation SQL ou σ π ⋈), flux ; génération de l'arbre depuis une requête SELECT (jointures, alias, GROUP BY, HAVING, ORDER BY, LIMIT, UNION…)
 - [ ] DRW-001 (P4) ⭐ Dessin libre façon draw.io : bibliothèque de formes génériques, connecteurs, texte libre
@@ -233,7 +233,7 @@
 - [ ] C4-001 (P4) **C4** : Person, Software System, Container, Component (externes ou non), Relationship ; niveaux Context/Container/Component
 - [ ] MM-001 (P4) **Mindmap** : Node, Edge, ajout rapide d'enfants/frères au clavier
 - [ ] WF-001 (P4) **Wireframes** : Frame (desktop/mobile/tablette), Button, Text, Radio, Checkbox, Switch, Link, Tab, Tab List, Input, Dropdown, Panel, Image, Separator, Avatar, Slider
-- [ ] CLD-001 (P4) *Optionnel* — Architecture AWS / Azure / GCP : cadre générique (groupes, services, connecteurs). Les icônes officielles des fournisseurs ne seront intégrées que si leur licence le permet.
+- [ ] CLD-001 (P4) *Optionnel* - Architecture AWS / Azure / GCP : cadre générique (groupes, services, connecteurs). Les icônes officielles des fournisseurs ne seront intégrées que si leur licence le permet.
 
 ---
 
@@ -244,16 +244,16 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 | Id | Langage | Génération | Reverse |
 |---|---|---|---|
 | CG-JAVA | Java (sortie non compilée : pas de `javac` sur la machine) | [~] | [~] |
-| CG-CS | C# (sortie non compilée : pas de compilateur C#) | [~] | — |
-| CG-CPP | C++ (.h/.cpp), compilé par `g++` dans les tests | [~] | — |
+| CG-CS | C# (sortie non compilée : pas de compilateur C#) | [~] | - |
+| CG-CPP | C++ (.h/.cpp), compilé par `g++` dans les tests | [~] | - |
 | CG-PY | Python, importé et exécuté dans les tests | [~] | [~] |
 | CG-TS | TypeScript, vérifié par `tsc --strict` | [~] | [~] |
 | CG-PHP | PHP, vérifié par `php -l` | [~] | [~] |
 | CG-SQL | SQL DDL (MySQL/MariaDB, PostgreSQL, SQLite) depuis l'ERD, exécuté dans SQLite par les tests | [~] | [~] |
 
-- [~] RE-001 Le reverse crée diagrammes de hiérarchie de types, de structure de paquetages et d'ERD (options) — un diagramme de classes par paquetage (super-types au-dessus), un diagramme de paquetages, ERD + MLD pour le SQL
+- [~] RE-001 Le reverse crée diagrammes de hiérarchie de types, de structure de paquetages et d'ERD (options) - un diagramme de classes par paquetage (super-types au-dessus), un diagramme de paquetages, ERD + MLD pour le SQL
 - [~] RE-002 Tolérance aux erreurs de syntaxe (le reste du fichier est analysé)
-- [ ] RE-003 Import d'un schéma depuis une connexion **MariaDB/MySQL** active (hôte, port, base) → ERD — pas encore fait (l'import d'un script SQL / d'un `mysqldump` est disponible)
+- [ ] RE-003 Import d'un schéma depuis une connexion **MariaDB/MySQL** active (hôte, port, base) → ERD - pas encore fait (l'import d'un script SQL / d'un `mysqldump` est disponible)
 - [ ] CG-100 (P4) ⭐ Export d'un diagramme de classes vers un **squelette de projet** (Maven/Gradle, npm/tsconfig, pyproject, composer…) : arborescence + fichiers
 - [ ] CG-101 (P4) Génération par templates (équivalent de la commande `ejs`)
 
@@ -274,14 +274,14 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 - [ ] PLUS-004 **Comparaison de deux versions** d'un modèle (fichiers ou révisions git) : éléments ajoutés, supprimés et modifiés, diff des propriétés, mise en évidence sur les diagrammes
 - [ ] PLUS-005 Squelette de projet (voir CG-100)
 - [ ] PLUS-006 Sauvegarde diff-friendly (voir FILE-011)
-- [ ] PLUS-007 Fusion à trois voies de `.mdj` (driver de merge git) — *optionnel*
+- [ ] PLUS-007 Fusion à trois voies de `.mdj` (driver de merge git) - *optionnel*
 
 ## 11. Qualité & livraison
 
 - [x] QA-001 Tests unitaires : métamodèle, opérations/undo, sérialisation `.mdj` (aller-retour sur des fichiers réels), quick-edit, générateurs, parseurs (Vitest)
-- [ ] QA-002 Corpus de fichiers `.mdj` de référence (exemples open source + fichiers générés), avec un test de non-régression par fichier — *partiel* : 1 fichier de référence
+- [ ] QA-002 Corpus de fichiers `.mdj` de référence (exemples open source + fichiers générés), avec un test de non-régression par fichier - *partiel* : 1 fichier de référence
 - [ ] QA-003 Tests E2E de l'interface (Playwright sur le frontend, `tauri-driver` pour les tests de fumée)
-- [ ] QA-004 Benchmarks de performance (DG-014) dans la CI — *partiel* : `scripts/bench.ts` et un test de non-régression (mise en page d'un déplacement sur 500 classes) ; pas encore de CI
+- [ ] QA-004 Benchmarks de performance (DG-014) dans la CI - *partiel* : `scripts/bench.ts` et un test de non-régression (mise en page d'un déplacement sur 500 classes) ; pas encore de CI
 - [ ] PKG-L1 (P4) AppImage
 - [ ] PKG-L2 (P4) `.deb`
 - [ ] PKG-L3 (P4) `.rpm`

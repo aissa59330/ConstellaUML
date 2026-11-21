@@ -1,6 +1,6 @@
 // Relational model (MLD) notation: a table is its name above one row of
-// attributes between two rules — primary key underlined, foreign keys
-// starred, types in parentheses — and foreign keys are arrows "FK(cols)"
+// attributes between two rules - primary key underlined, foreign keys
+// starred, types in parentheses - and foreign keys are arrows "FK(cols)"
 // from the referencing table to the referenced one.
 import type { Element } from "../../core/element";
 import { contains, withStyle } from "../../render/graphics";

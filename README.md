@@ -20,7 +20,7 @@ Détail et avancement : [FEATURES.md](FEATURES.md) · architecture : [ARCHITECTU
 Les paquets sont produits par l'intégration continue à chaque version (`v*`) et publiés dans les **Releases** :
 
 - **Windows 10 et 11** : installeur `ConstellaUML_0.2.0_x64-setup.exe` (ou `ConstellaUML_0.2.0_x64_fr-FR.msi`) ;
-- **Linux** (compilés sur Ubuntu 22.04) : AppImage, `.deb`, `.rpm` — Ubuntu 22.04 et plus récent, Debian 12, Arch, Fedora.
+- **Linux** (compilés sur Ubuntu 22.04) : AppImage, `.deb`, `.rpm` - Ubuntu 22.04 et plus récent, Debian 12, Arch, Fedora.
 
  Mode d'emploi : [packaging/LISEZMOI.md](packaging/LISEZMOI.md).
 

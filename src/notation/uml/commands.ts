@@ -200,7 +200,7 @@ export function createEdge(repo: Repository, diagram: Element, tool: EdgeTool, t
         tx.insert(hm, "ownedElements", model);
         addForeignKeyColumns(tx, tm, hm);
       } else if (tool.modelType === "ERDRelationship") {
-        // variant "card1:card2[:identifying]" — end1 is the source (parent) entity.
+        // variant "card1:card2[:identifying]" - end1 is the source (parent) entity.
         const [c1, c2, flag] = (tool.variant ?? "1:0..*").split(":");
         model = create("ERDRelationship", { name: "", identifying: flag === "identifying" });
         model.end1 = create("ERDRelationshipEnd", { reference: ref(tm), cardinality: c1, _parent: ref(model) });

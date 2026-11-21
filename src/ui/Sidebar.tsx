@@ -45,7 +45,7 @@ export function Toolbox() {
     <section class="panel toolbox">
       <header class="panel-header">{t("panel.toolbox")}</header>
       <div class="panel-body">
-        <Show when={s.activeDiagram()} fallback={<p class="empty-hint">—</p>}>
+        <Show when={s.activeDiagram()} fallback={<p class="empty-hint">-</p>}>
           <button class="tool-row" classList={{ active: s.tool() === null }} onClick={() => s.setTool(null)}>
             <Icon name="select" />
             <span>{t("toolbox.select")}</span>

@@ -1,4 +1,4 @@
-# ConstellaUML — Architecture
+# ConstellaUML - Architecture
 
 ## 1. Vue d'ensemble
 
@@ -28,7 +28,7 @@
 `core` ← `notation` ⇄ `render` ← `editor` ← `ui`. `notation` utilise les primitives de dessin de `render/graphics.ts` et `render/colors.ts`, et `render/diagram.ts` orchestre les notations. `io` et `codegen` ne dépendent que de `core`.
 `core` ne connaît **ni le DOM, ni Tauri** : il s'exécute dans Node et est testé sans navigateur.
 
-## 2. Choix du moteur de diagrammes — décision : moteur maison (phase 1)
+## 2. Choix du moteur de diagrammes - décision : moteur maison (phase 1)
 
 | Critère | maxGraph | **Rendu maison sur la vue `.mdj`** (recommandé) |
 |---|---|---|

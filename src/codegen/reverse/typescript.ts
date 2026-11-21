@@ -27,7 +27,7 @@ function readMods(c: Cursor): Mods {
       c.next();
       while (c.is(".") && c.isId(1)) c.i += 2;
       if (c.is("(")) c.skipGroup();
-      // A modifier is followed by the member name, not by ( : ? = ; — "readonly(" is a method.
+      // A modifier is followed by the member name, not by ( : ? = ; - "readonly(" is a method.
     } else if (t.k === "id" && MODIFIERS.has(t.v) && (c.isId(1) || c.is("[", 1) || c.is("{", 1) || c.is("*", 1) || c.peek(1)?.k === "str")) {
       set.add(t.v);
       c.next();

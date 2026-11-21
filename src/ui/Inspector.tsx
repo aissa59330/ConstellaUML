@@ -74,7 +74,7 @@ function FieldEditor(props: { el: Element; field: FieldDef }) {
       </Match>
       <Match when={props.field.kind === "ref"}>
         <select class="field-input" value={isRef(value()) ? (value() as { $ref: string }).$ref : ""} onChange={(e) => set(e.currentTarget.value ? ref(e.currentTarget.value) : undefined)}>
-          <option value="">—</option>
+          <option value="">-</option>
           <For each={candidatesFor(props.field.refType)}>{(c) => <option value={c._id}>{c.name || c._type}</option>}</For>
         </select>
       </Match>

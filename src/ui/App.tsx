@@ -81,7 +81,7 @@ export function App() {
   onCleanup(() => document.removeEventListener("keydown", onKey));
 
   createEffect(() => {
-    platform.setWindowTitle(`${(s.modelVersion(), s.repo.dirty) ? "● " : ""}${s.projectName()} — ConstellaUML`);
+    platform.setWindowTitle(`${(s.modelVersion(), s.repo.dirty) ? "● " : ""}${s.projectName()} - ConstellaUML`);
   });
 
   return (

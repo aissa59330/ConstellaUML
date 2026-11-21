@@ -72,7 +72,7 @@ install -Dm644 /dev/stdin "$DESKTOP" <<DESKTOP
 Type=Application
 Name=$NAME
 GenericName=Modeleur UML
-Comment=Diagrammes UML, entité-relation, génération de code — créé par Aïssa Ouameur
+Comment=Diagrammes UML, entité-relation, génération de code - créé par Aïssa Ouameur
 Exec=$EXEC %f
 Icon=$ICON_DIR/512x512/apps/constella.png
 Terminal=false

@@ -23,7 +23,7 @@ export function MenuList(props: { items: MenuItem[]; onDone: () => void; level?:
                 <Show when={openSub() === i()}>
                   <div class="submenu">
                     <div class="menu">
-                      <Show when={recentFiles().length} fallback={<div class="menu-item disabled">—</div>}>
+                      <Show when={recentFiles().length} fallback={<div class="menu-item disabled">-</div>}>
                         <For each={recentFiles()}>
                           {(p) => (
                             <button
