@@ -29,3 +29,23 @@ jobs:
         run: npm test
       - name: Tests Rust
         run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - name: Types et règles de couches
+        run: npm run check
+      - name: Tests unitaires
+        run: npm test
+      - name: Tests Rust
+        run: cargo test --manifest-path src-tauri/Cargo.toml

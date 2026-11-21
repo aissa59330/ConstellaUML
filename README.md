@@ -2,7 +2,7 @@
 
 *Créé par **Aïssa Ouameur**.*
 
-Modeleur UML pour Linux : Tauri 2 + TypeScript + Solid.js, rendu de diagrammes maison (Canvas / SVG), fichiers projet `.mdj`.
+Modeleur UML pour Linux et Windows : Tauri 2 + TypeScript + Solid.js, rendu de diagrammes maison (Canvas / SVG), fichiers projet `.mdj`.
 
 ![Modèle relationnel](docs/screenshots/phase3-modele-relationnel.jpg)
 
@@ -17,18 +17,25 @@ Détail et avancement : [FEATURES.md](FEATURES.md) · architecture : [ARCHITECTU
 
 ## Installer
 
-Les paquets (AppImage, `.deb`, `.rpm`) sont produits par l'intégration continue à chaque version (`v*`), sur Ubuntu 22.04 : ils fonctionnent sur Ubuntu 22.04 et plus récent, Debian 12, Arch, Fedora. Mode d'emploi : [packaging/LISEZMOI.md](packaging/LISEZMOI.md).
+Les paquets sont produits par l'intégration continue à chaque version (`v*`) et publiés dans les **Releases** :
+
+- **Windows 10 et 11** : installeur `Constella_0.1.0_x64-setup.exe` (ou `Constella_0.1.0_x64_fr-FR.msi`) ;
+- **Linux** (compilés sur Ubuntu 22.04) : AppImage, `.deb`, `.rpm` — Ubuntu 22.04 et plus récent, Debian 12, Arch, Fedora.
+
+ Mode d'emploi : [packaging/LISEZMOI.md](packaging/LISEZMOI.md).
 
 ## Développement
 
-Prérequis Debian / Ubuntu : `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev build-essential`, Node 20+, Rust stable.
+Prérequis : Node 20+, Rust stable, et
+- Debian / Ubuntu : `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev build-essential` ;
+- Windows : Visual Studio Build Tools (charge de travail « Développement Desktop en C++ ») et WebView2 (déjà présent sur Windows 10/11).
 
 ```bash
 npm install
 npm test               # tests unitaires (Vitest)
 npm run check          # types + règles de couches
 npm run tauri dev      # application avec rechargement à chaud
-npx tauri build        # binaire + paquets dans src-tauri/target/release/bundle/
+npx tauri build        # binaire + paquets (Linux : AppImage/.deb/.rpm, Windows : .exe/.msi) dans src-tauri/target/release/bundle/
 packaging/install-local.sh   # installe la version compilée dans ~/.local (menu, icône, .mdj)
 ```
 

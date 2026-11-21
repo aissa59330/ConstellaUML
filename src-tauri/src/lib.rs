@@ -141,7 +141,20 @@ fn startup_file() -> Option<String> {
         .skip(1)
         .find(|a| a.ends_with(".mdj") || a.ends_with(".mfj"))
         .and_then(|a| fs::canonicalize(a).ok())
-        .map(|p| p.to_string_lossy().into_owned())
+        .map(|p| display_path(&p))
+}
+
+/// Path as the user knows it: on Windows, `canonicalize` returns a verbatim
+/// `\\?\C:\...` path, which is stripped back to `C:\...`.
+fn display_path(p: &Path) -> String {
+    let s = p.to_string_lossy();
+    if let Some(rest) = s.strip_prefix(r"\\?\UNC\") {
+        format!(r"\\{rest}")
+    } else if let Some(rest) = s.strip_prefix(r"\\?\") {
+        rest.to_string()
+    } else {
+        s.into_owned()
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -191,5 +204,12 @@ mod tests {
         assert_eq!(found.len(), 1);
         assert_eq!(found[0].path, "a/B.java");
         fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn verbatim_windows_paths_are_stripped() {
+        assert_eq!(display_path(Path::new(r"\\?\C:\a\b.mdj")), r"C:\a\b.mdj");
+        assert_eq!(display_path(Path::new(r"\\?\UNC\srv\share\b.mdj")), r"\\srv\share\b.mdj");
+        assert_eq!(display_path(Path::new("/home/a/b.mdj")), "/home/a/b.mdj");
     }
 }

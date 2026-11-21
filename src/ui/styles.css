@@ -2,7 +2,7 @@
 
 :root {
   --font-ui: "Inter", "Noto Sans", "Cantarell", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", Consolas, ui-monospace, monospace;
   --fs: 12.5px;
   --fs-small: 11.5px;
   --radius: 6px;

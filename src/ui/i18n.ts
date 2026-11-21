@@ -242,7 +242,7 @@ const fr = {
   "toast.copied": "Copié",
   "toast.error": "Erreur : {msg}",
   "toast.clipboardUnsupported": "Le presse-papiers d'images n'est pas disponible ici ; utilisez Exporter l'image.",
-  "about.text": "Constella {version} — modeleur UML pour Linux.\nCréé par Aïssa Ouameur.\nLogiciel libre sous licence GPL-3.0 ou ultérieure.",
+  "about.text": "Constella {version} — modeleur UML pour Linux et Windows.\nCréé par Aïssa Ouameur.\nLogiciel libre sous licence GPL-3.0 ou ultérieure.",
   "quickedit.hint": "Entrée : valider · Échap : annuler · Ctrl+Entrée : ajouter un attribut · Ctrl+Maj+Entrée : ajouter une opération",
 };
 
@@ -487,7 +487,7 @@ const en: Record<I18nKey, string> = {
   "toast.copied": "Copied",
   "toast.error": "Error: {msg}",
   "toast.clipboardUnsupported": "Image clipboard is not available here; use Export Image.",
-  "about.text": "Constella {version} — UML modeler for Linux.\nCreated by Aïssa Ouameur.\nFree software under the GPL-3.0-or-later license.",
+  "about.text": "Constella {version} — UML modeler for Linux and Windows.\nCreated by Aïssa Ouameur.\nFree software under the GPL-3.0-or-later license.",
   "quickedit.hint": "Enter: apply · Esc: cancel · Ctrl+Enter: add attribute · Ctrl+Shift+Enter: add operation",
 };
 
