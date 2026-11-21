@@ -1,4 +1,4 @@
-# Constella — Architecture
+# ConstellaUML — Architecture
 
 ## 1. Vue d'ensemble
 

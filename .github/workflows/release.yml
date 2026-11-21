@@ -1,6 +1,9 @@
-# Builds the packages for each version tag (v0.1.0…) and attaches them to a
-# GitHub release: Linux on Ubuntu 22.04 (oldest supported glibc), Windows on
-# the latest Windows runner (NSIS installer + MSI).
+# Builds the packages for each version tag (v0.2.0…) and publishes them in a
+# GitHub release, with the signed update files and latest.json read by the
+# in-app updater. Linux is built on Ubuntu 22.04 (oldest supported glibc).
+#
+# Required repository secret: TAURI_SIGNING_PRIVATE_KEY (content of the private
+# key whose public half is in src-tauri/tauri.conf.json > plugins.updater).
 name: Release
 
 on:
@@ -12,11 +15,20 @@ permissions:
   contents: write
 
 jobs:
-  linux:
-    runs-on: ubuntu-22.04
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            bundles: appimage,deb,rpm
+          - platform: windows-latest
+            bundles: nsis,msi
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-      - name: Dépendances système
+      - name: Dépendances système (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev patchelf file
@@ -30,53 +42,30 @@ jobs:
           workspaces: src-tauri
       - run: npm ci
       - run: npm test
-      - name: Paquets AppImage, .deb, .rpm
-        run: npx tauri build --bundles appimage,deb,rpm
-      - name: Sommes de contrôle
-        run: |
-          mkdir -p out
-          cp src-tauri/target/release/bundle/appimage/*.AppImage src-tauri/target/release/bundle/deb/*.deb src-tauri/target/release/bundle/rpm/*.rpm packaging/arch/PKGBUILD packaging/LISEZMOI.md out/
-          cd out && sha256sum *.AppImage *.deb *.rpm > SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - name: Paquets, signatures et latest.json
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
         with:
-          name: constella-linux
-          path: out/*
-      - name: Publier la version
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: out/*
+          tagName: ${{ github.ref_name }}
+          releaseName: ConstellaUML ${{ github.ref_name }}
+          releaseBody: "Téléchargements ci-dessous. Mode d'emploi : packaging/LISEZMOI.md du dépôt."
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          args: --bundles ${{ matrix.bundles }}
 
-  windows:
-    runs-on: windows-latest
+  extras:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-      - run: npm ci
-      - run: npm test
-      - name: Tests Rust
-        run: cargo test --manifest-path src-tauri/Cargo.toml
-      - name: Installeurs .exe (NSIS) et .msi
-        run: npx tauri build --bundles nsis,msi
-      - name: Sommes de contrôle
-        shell: bash
-        run: |
-          mkdir -p out
-          cp src-tauri/target/release/bundle/nsis/*.exe src-tauri/target/release/bundle/msi/*.msi out/
-          cd out && sha256sum *.exe *.msi > SHA256SUMS-windows
-      - uses: actions/upload-artifact@v4
-        with:
-          name: constella-windows
-          path: out/*
-      - name: Publier la version
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: PKGBUILD et mode d'emploi
         uses: softprops/action-gh-release@v2
         with:
-          files: out/*
+          files: |
+            packaging/arch/PKGBUILD
+            packaging/LISEZMOI.md

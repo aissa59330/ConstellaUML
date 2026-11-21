@@ -388,7 +388,7 @@ export function FindResults() {
 
 function ConfirmDialog(props: { message: string; buttons: { label: string; value: string; primary?: boolean }[]; resolve: (v: string) => void }) {
   return (
-    <Modal title="Constella" onClose={() => props.resolve(props.buttons[0].value)} width={460}>
+    <Modal title="ConstellaUML" onClose={() => props.resolve(props.buttons[0].value)} width={460}>
       <p class="confirm-text">{props.message}</p>
       <footer class="modal-footer">
         <span class="spacer" />
@@ -455,7 +455,7 @@ export function Dialogs() {
             <Modal title={t("cmd.help.about")} onClose={close} width={380}>
               <div class="about">
                 <img src="/logo.svg" width="72" height="72" alt="" />
-                <p style={{ "white-space": "pre-line" }}>{t("about.text", { version: "0.1.0" })}</p>
+                <p style={{ "white-space": "pre-line" }}>{t("about.text", { version: __APP_VERSION__ })}</p>
               </div>
             </Modal>
           </Match>

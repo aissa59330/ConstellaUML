@@ -1,7 +1,7 @@
 # Licences
 
 ## Règle du projet
-- Constella ne contient **aucun code, ressource ni fichier provenant d'un logiciel tiers propriétaire** : métamodèle, icônes et templates sont écrits pour le projet.
+- ConstellaUML ne contient **aucun code, ressource ni fichier provenant d'un logiciel tiers propriétaire** : métamodèle, icônes et templates sont écrits pour le projet.
 - Le format de fichier `.mdj` est implémenté pour l'**interopérabilité** (noms de types et de champs nécessaires pour lire et écrire les projets).
 - Toute dépendance est ajoutée ici **avant** son intégration, avec sa licence vérifiée.
 
@@ -33,8 +33,8 @@
 | maxGraph *(repli seulement)* | moteur de graphes | Apache-2.0 | ☐ |
 
 ## Auteur
-- Constella est créé par **Aïssa Ouameur** (© 2026) et distribué sous **GPL-3.0 ou ultérieure** (fichier `LICENSE`). Toutes les dépendances ci-dessus (MIT, Apache-2.0, ISC, LGPL, SIL OFL) sont compatibles avec la GPL-3.0.
+- ConstellaUML est créé par **Aïssa Ouameur** (© 2026) et distribué sous **GPL-3.0 ou ultérieure** (fichier `LICENSE`). Toutes les dépendances ci-dessus (MIT, Apache-2.0, ISC, LGPL, SIL OFL) sont compatibles avec la GPL-3.0.
 
 ## Ressources propres
-- Logo et icônes Constella : créés pour ce projet (voir `assets/logo/`, `src/ui/icons.tsx`).
+- Logo et icônes ConstellaUML : créés pour ce projet (voir `assets/logo/`, `src/ui/icons.tsx`).
 - `tests/fixtures/mdj/library.mdj` : écrit pour ce projet, avec la structure du format `.mdj`.

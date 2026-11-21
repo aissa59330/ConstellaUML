@@ -25,6 +25,8 @@ import { type Theme, resolveColor } from "../render/colors";
 import { arrangeDiagram, diagramBounds, drawDiagram, hitTest } from "../render/diagram";
 import { type Point, type Rect, contains, intersects } from "../render/graphics";
 
+const clamp = (x: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, x));
+
 export interface EditorHost {
   repo: Repository;
   diagram(): Element | undefined;
@@ -693,16 +695,16 @@ export class DiagramEditor {
     const c = target.getContext("2d");
     if (!d || !c) return;
     const theme = this.host.theme();
-    const b = diagramBounds(d) ?? { x: 0, y: 0, w: 100, h: 100 };
     const v = this.visibleRect();
-    const all = {
-      x: Math.min(b.x, v.x) - 20,
-      y: Math.min(b.y, v.y) - 20,
-      w: Math.max(b.x + b.w, v.x + v.w) - Math.min(b.x, v.x) + 40,
-      h: Math.max(b.y + b.h, v.y + v.h) - Math.min(b.y, v.y) + 40,
-    };
+    // The frame depends on the diagram only, never on the viewport: otherwise
+    // panning from the minimap changes its scale mid-drag and the viewport
+    // rectangle runs away into a corner. An empty diagram shows the viewport.
+    const b = diagramBounds(d) ?? v;
+    const pad = Math.max(20, Math.max(b.w, b.h) * 0.05);
+    const all = { x: b.x - pad, y: b.y - pad, w: b.w + 2 * pad, h: b.h + 2 * pad };
     const dpr = window.devicePixelRatio || 1;
     const W = target.clientWidth, H = target.clientHeight;
+    if (!W || !H) return;
     target.width = W * dpr;
     target.height = H * dpr;
     const s = Math.min(W / all.w, H / all.h);
@@ -714,14 +716,21 @@ export class DiagramEditor {
     c.scale(s, s);
     c.translate(-all.x, -all.y);
     drawDiagram(d, { ...this.renderCtx, g: new CanvasGraphics(c) });
+    // Viewport rectangle, kept inside the minimap so it never disappears
+    // (zoomed out: it covers the whole map; scrolled away: it sticks to the edge).
+    const ox = (W - all.w * s) / 2, oy = (H - all.h * s) / 2;
+    const view = { x: all.x - ox / s, y: all.y - oy / s, w: W / s, h: H / s };
+    const m = 1 / s;
+    const x0 = clamp(v.x, view.x + m, view.x + view.w - 4 * m), y0 = clamp(v.y, view.y + m, view.y + view.h - 4 * m);
+    const x1 = clamp(v.x + v.w, x0 + 3 * m, view.x + view.w - m), y1 = clamp(v.y + v.h, y0 + 3 * m, view.y + view.h - m);
     c.strokeStyle = this.accent(theme);
     c.lineWidth = 2 / s;
     c.fillStyle = this.accent(theme);
-    c.globalAlpha = 0.1;
-    c.fillRect(v.x, v.y, v.w, v.h);
+    c.globalAlpha = 0.12;
+    c.fillRect(x0, y0, x1 - x0, y1 - y0);
     c.globalAlpha = 1;
-    c.strokeRect(v.x, v.y, v.w, v.h);
-    (target as HTMLCanvasElement & { __map?: unknown }).__map = { all, s, ox: (W - all.w * s) / 2, oy: (H - all.h * s) / 2 };
+    c.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    (target as HTMLCanvasElement & { __map?: unknown }).__map = { all, s, ox, oy };
   }
 
   /** Minimap click → diagram point. */
@@ -729,6 +738,12 @@ export class DiagramEditor {
     const m = (target as HTMLCanvasElement & { __map?: { all: Rect; s: number; ox: number; oy: number } }).__map;
     if (!m) return null;
     return { x: (x - m.ox) / m.s + m.all.x, y: (y - m.oy) / m.s + m.all.y };
+  }
+
+  /** Center of the visible area, in diagram coordinates. */
+  viewCenter(): Point {
+    const v = this.visibleRect();
+    return { x: v.x + v.w / 2, y: v.y + v.h / 2 };
   }
 
   /** Bend points and line style helpers for oblique edges, used by format commands. */

@@ -156,6 +156,10 @@ export function DiagramArea() {
       onFormatPainter: applyPainter,
     });
     setActiveEditor(editor);
+    // Window or panel resized: the viewport rectangle changes size.
+    const ro = new ResizeObserver(() => s.panels().minimap && scheduleThumbnail());
+    ro.observe(container);
+    onCleanup(() => ro.disconnect());
     onCleanup(() => {
       editor.dispose();
       setActiveEditor(null);
@@ -401,16 +405,34 @@ export function DiagramArea() {
     }
   };
 
+  // Click: centers the view there. Drag inside the viewport rectangle: moves it
+  // by the pointer's motion, without jumping to its center.
   const onMinimap = (e: PointerEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
     const r = minimap.getBoundingClientRect();
+    const at = (ev: PointerEvent) => editor.minimapToDiagram(minimap, ev.clientX - r.left, ev.clientY - r.top);
+    const p0 = at(e);
+    if (!p0) return;
+    const v = editor.visibleRect();
+    const inside = p0.x >= v.x && p0.x <= v.x + v.w && p0.y >= v.y && p0.y <= v.y + v.h;
+    const c0 = editor.viewCenter();
+    const offset = inside ? { x: c0.x - p0.x, y: c0.y - p0.y } : { x: 0, y: 0 };
+    let frame = 0;
     const move = (ev: PointerEvent) => {
-      const p = editor.minimapToDiagram(minimap, ev.clientX - r.left, ev.clientY - r.top);
-      if (p) editor.scrollTo(p);
+      const p = at(ev);
+      if (!p) return;
+      editor.scrollTo({ x: p.x + offset.x, y: p.y + offset.y });
+      // Immediate feedback while dragging (the regular redraw is throttled).
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => editor.thumbnail(minimap));
     };
     move(e);
     minimap.setPointerCapture(e.pointerId);
     minimap.onpointermove = move;
-    minimap.onpointerup = () => (minimap.onpointermove = null);
+    minimap.onpointerup = minimap.onpointercancel = () => {
+      minimap.onpointermove = minimap.onpointerup = minimap.onpointercancel = null;
+    };
   };
 
   return (

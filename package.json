@@ -1,7 +1,7 @@
 {
   "name": "constella",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,8 @@
     "@radix-ui/colors": "^3.0.0",
     "@tauri-apps/api": "^2.12.5",
     "@tauri-apps/plugin-dialog": "^2.8.4",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.1",
     "markdown-it": "^15.0.3",
     "solid-js": "^1.9.20"
   },
@@ -31,5 +33,5 @@
   },
   "author": "Aïssa Ouameur",
   "license": "GPL-3.0-or-later",
-  "description": "Constella — modeleur UML desktop pour Linux et Windows"
+  "description": "ConstellaUML — modeleur UML desktop pour Linux et Windows"
 }

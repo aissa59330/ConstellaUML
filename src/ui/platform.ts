@@ -106,7 +106,7 @@ export async function startupFile(): Promise<string | null> {
   return isTauri ? invoke<string | null>("startup_file") : null;
 }
 
-export async function confirm(message: string, title = "Constella"): Promise<boolean> {
+export async function confirm(message: string, title = "ConstellaUML"): Promise<boolean> {
   if (isTauri) return ask(message, { title, kind: "warning" });
   return window.confirm(message);
 }

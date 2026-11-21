@@ -25,6 +25,7 @@ import { boundsOf, isEdgeView } from "../notation/views";
 import { t, lang, setLang } from "./i18n";
 import * as platform from "./platform";
 import * as s from "./store";
+import { checkForUpdates } from "./updater";
 
 export interface Command {
   id: string;
@@ -433,6 +434,7 @@ register(
   { id: "view:language", label: "cmd.view.language", run: () => setLang(lang() === "fr" ? "en" : "fr") },
   { id: "help:about", label: "cmd.help.about", run: () => s.setDialog({ kind: "about" }) },
   { id: "help:shortcuts", label: "cmd.help.shortcuts", run: () => s.setDialog({ kind: "shortcuts" }) },
+  { id: "help:updates", label: "cmd.help.updates", run: () => void checkForUpdates(true) },
 );
 
 function cycleDiagram(delta: number): void {
@@ -645,7 +647,7 @@ export const MAIN_MENU: { label: string; items: MenuItem[] }[] = [
       { cmd: "view:language" },
     ],
   },
-  { label: "menu.help", items: [{ cmd: "help:shortcuts" }, { cmd: "help:about" }] },
+  { label: "menu.help", items: [{ cmd: "help:shortcuts" }, { cmd: "help:updates" }, { cmd: "help:about" }] },
 ];
 
 export const DIAGRAM_CONTEXT_MENU: MenuItem[] = [

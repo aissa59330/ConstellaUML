@@ -1,4 +1,4 @@
-# Constella
+# ConstellaUML
 
 *Créé par **Aïssa Ouameur**.*
 
@@ -19,7 +19,7 @@ Détail et avancement : [FEATURES.md](FEATURES.md) · architecture : [ARCHITECTU
 
 Les paquets sont produits par l'intégration continue à chaque version (`v*`) et publiés dans les **Releases** :
 
-- **Windows 10 et 11** : installeur `Constella_0.1.0_x64-setup.exe` (ou `Constella_0.1.0_x64_fr-FR.msi`) ;
+- **Windows 10 et 11** : installeur `ConstellaUML_0.2.0_x64-setup.exe` (ou `ConstellaUML_0.2.0_x64_fr-FR.msi`) ;
 - **Linux** (compilés sur Ubuntu 22.04) : AppImage, `.deb`, `.rpm` — Ubuntu 22.04 et plus récent, Debian 12, Arch, Fedora.
 
  Mode d'emploi : [packaging/LISEZMOI.md](packaging/LISEZMOI.md).
@@ -43,6 +43,6 @@ packaging/install-local.sh   # installe la version compilée dans ~/.local (menu
 
 Copyright © 2026 Aïssa Ouameur.
 
-Constella est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la **GNU General Public License** publiée par la Free Software Foundation, version 3 ou (à votre choix) toute version ultérieure. Il est distribué dans l'espoir d'être utile, mais **sans aucune garantie**. Texte complet : [LICENSE](LICENSE).
+ConstellaUML est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la **GNU General Public License** publiée par la Free Software Foundation, version 3 ou (à votre choix) toute version ultérieure. Il est distribué dans l'espoir d'être utile, mais **sans aucune garantie**. Texte complet : [LICENSE](LICENSE).
 
 Les bibliothèques tierces gardent leur propre licence, toutes compatibles avec la GPL-3.0 ([LICENSES.md](LICENSES.md)).

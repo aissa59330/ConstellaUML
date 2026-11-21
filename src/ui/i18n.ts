@@ -4,7 +4,7 @@ import { NOTATION_LABELS } from "../notation/uml/toolbox";
 export type Lang = "fr" | "en";
 
 const fr = {
-  "app.name": "Constella",
+  "app.name": "ConstellaUML",
   "app.untitled": "Sans titre",
   "menu.file": "Fichier",
   "menu.edit": "Édition",
@@ -144,8 +144,16 @@ const fr = {
   "cmd.view.minimap": "Minimap",
   "cmd.view.toggleTheme": "Basculer thème clair / sombre",
   "cmd.view.language": "Langue : English",
-  "cmd.help.about": "À propos de Constella",
+  "cmd.help.about": "À propos de ConstellaUML",
   "cmd.help.shortcuts": "Raccourcis clavier",
+  "cmd.help.updates": "Rechercher des mises à jour…",
+  "update.available": "Une nouvelle version de ConstellaUML est disponible : {version} (installée : {current}).\nL'installer maintenant ? L'application redémarrera ; pensez à enregistrer votre travail.",
+  "update.install": "Installer et redémarrer",
+  "update.later": "Plus tard",
+  "update.none": "ConstellaUML est à jour",
+  "update.downloading": "Téléchargement de la mise à jour…",
+  "update.manual": "La mise à jour ne peut pas s'installer automatiquement avec ce type de paquet.\nTéléchargez la nouvelle version ici : {url}",
+  "update.desktopOnly": "Les mises à jour se font dans l'application installée",
   "panel.workingDiagrams": "Diagrammes ouverts",
   "panel.toolbox": "Toolbox",
   "panel.explorer": "Explorateur de modèle",
@@ -242,7 +250,7 @@ const fr = {
   "toast.copied": "Copié",
   "toast.error": "Erreur : {msg}",
   "toast.clipboardUnsupported": "Le presse-papiers d'images n'est pas disponible ici ; utilisez Exporter l'image.",
-  "about.text": "Constella {version} — modeleur UML pour Linux et Windows.\nCréé par Aïssa Ouameur.\nLogiciel libre sous licence GPL-3.0 ou ultérieure.",
+  "about.text": "ConstellaUML {version} — modeleur UML pour Linux et Windows.\nCréé par Aïssa Ouameur.\nLogiciel libre sous licence GPL-3.0 ou ultérieure.",
   "quickedit.hint": "Entrée : valider · Échap : annuler · Ctrl+Entrée : ajouter un attribut · Ctrl+Maj+Entrée : ajouter une opération",
 };
 
@@ -389,8 +397,16 @@ const en: Record<I18nKey, string> = {
   "cmd.view.minimap": "Minimap",
   "cmd.view.toggleTheme": "Toggle Light / Dark Theme",
   "cmd.view.language": "Langue : Français",
-  "cmd.help.about": "About Constella",
+  "cmd.help.about": "About ConstellaUML",
   "cmd.help.shortcuts": "Keyboard Shortcuts",
+  "cmd.help.updates": "Check for Updates…",
+  "update.available": "A new version of ConstellaUML is available: {version} (installed: {current}).\nInstall it now? The application will restart; remember to save your work.",
+  "update.install": "Install and Restart",
+  "update.later": "Later",
+  "update.none": "ConstellaUML is up to date",
+  "update.downloading": "Downloading the update…",
+  "update.manual": "This kind of package cannot update itself.\nDownload the new version here: {url}",
+  "update.desktopOnly": "Updates are installed from the desktop application",
   "panel.workingDiagrams": "Working Diagrams",
   "panel.toolbox": "Toolbox",
   "panel.explorer": "Model Explorer",
@@ -487,7 +503,7 @@ const en: Record<I18nKey, string> = {
   "toast.copied": "Copied",
   "toast.error": "Error: {msg}",
   "toast.clipboardUnsupported": "Image clipboard is not available here; use Export Image.",
-  "about.text": "Constella {version} — UML modeler for Linux and Windows.\nCreated by Aïssa Ouameur.\nFree software under the GPL-3.0-or-later license.",
+  "about.text": "ConstellaUML {version} — UML modeler for Linux and Windows.\nCreated by Aïssa Ouameur.\nFree software under the GPL-3.0-or-later license.",
   "quickedit.hint": "Enter: apply · Esc: cancel · Ctrl+Enter: add attribute · Ctrl+Shift+Enter: add operation",
 };
 

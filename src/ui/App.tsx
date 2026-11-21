@@ -9,6 +9,7 @@ import { Inspector } from "./Inspector";
 import * as platform from "./platform";
 import { Toolbox, WorkingDiagrams } from "./Sidebar";
 import * as s from "./store";
+import { checkForUpdates } from "./updater";
 
 function Splitter(props: { onDrag: (dx: number) => void; vertical?: boolean; label: string }) {
   const down = (e: PointerEvent) => {
@@ -59,6 +60,8 @@ export function App() {
       s.reportError(e);
     }
     s.startAutosave();
+    // Quietly look for a newer version once the window is up.
+    setTimeout(() => void checkForUpdates(), 3000);
     if (platform.isTauri) {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
       const win = getCurrentWindow();
@@ -78,7 +81,7 @@ export function App() {
   onCleanup(() => document.removeEventListener("keydown", onKey));
 
   createEffect(() => {
-    platform.setWindowTitle(`${(s.modelVersion(), s.repo.dirty) ? "● " : ""}${s.projectName()} — Constella`);
+    platform.setWindowTitle(`${(s.modelVersion(), s.repo.dirty) ? "● " : ""}${s.projectName()} — ConstellaUML`);
   });
 
   return (

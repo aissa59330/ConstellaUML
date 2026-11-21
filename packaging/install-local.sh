@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs the release build of Constella for the current user (~/.local):
+# Installs the release build of ConstellaUML for the current user (~/.local):
 # binary, icons, menu entry and the .mdj / .mfj file types. Inside a
 # distrobox, the menu entry starts the app through the container so the host
 # launcher can show it.
@@ -25,7 +25,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
   for s in 32 64 128 256 512; do rm -f "$ICON_DIR/${s}x${s}/apps/constella.png"; done
   rm -f "$ICON_DIR/scalable/apps/constella.svg"
   refresh
-  echo "Constella désinstallé."
+  echo "ConstellaUML désinstallé."
   exit 0
 fi
 
@@ -45,7 +45,7 @@ install -Dm644 /dev/stdin "$MIME_DIR/packages/constella.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-constella-mdj">
-    <comment>Projet UML (Constella)</comment>
+    <comment>Projet UML (ConstellaUML)</comment>
     <glob pattern="*.mdj"/>
     <icon name="constella"/>
   </mime-type>
@@ -58,7 +58,7 @@ install -Dm644 /dev/stdin "$MIME_DIR/packages/constella.xml" <<'XML'
 XML
 
 EXEC="$BIN_DIR/constella"
-NAME="Constella"
+NAME="ConstellaUML"
 if [[ -n "${CONTAINER_ID:-}" && -e /run/.containerenv ]]; then
   # Inside a distrobox: the host launcher starts the app in this container, where its
   # libraries live (distrobox-enter is a host command, absent from the container).
@@ -84,5 +84,5 @@ StartupWMClass=constella
 DESKTOP
 
 refresh
-echo "Constella installé : $BIN_DIR/constella"
+echo "ConstellaUML installé : $BIN_DIR/constella"
 echo "Entrée de menu : $DESKTOP"

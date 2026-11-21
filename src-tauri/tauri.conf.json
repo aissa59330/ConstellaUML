@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Constella",
-  "version": "0.1.0",
+  "productName": "ConstellaUML",
+  "version": "0.2.0",
   "identifier": "io.constella.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Constella",
+        "title": "ConstellaUML",
         "width": 1440,
         "height": 900,
         "minWidth": 800,
@@ -62,6 +62,18 @@
       },
       "wix": {
         "language": "fr-FR"
+      }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVDRjZDRjA1Njk1RTQwQzQKUldURVFGNXBCYy8yWEloWUZmdFFzd01jYUtRYk56N2hTN3R1T2k3VG9tUXlKcGtINFdJVHBIdTgK",
+      "endpoints": [
+        "https://github.com/aissa59330/ConstellaUML/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
       }
     }
   }

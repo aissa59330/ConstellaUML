@@ -1,4 +1,4 @@
-// Icons drawn for Constella (16×16 grid, stroke = currentColor).
+// Icons drawn for ConstellaUML (16×16 grid, stroke = currentColor).
 import type { JSX } from "solid-js";
 
 const P: Record<string, () => JSX.Element> = {

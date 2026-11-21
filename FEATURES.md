@@ -1,7 +1,7 @@
-# Constella — Cahier des charges & checklist des fonctionnalités
+# ConstellaUML — Cahier des charges & checklist des fonctionnalités
 
 > Outil de modélisation UML desktop pour Linux (voir aussi [LICENSES.md](LICENSES.md)).
-> Nom de travail : **Constella** (les modèles sont des étoiles, les relations des constellations).
+> Nom de travail : **ConstellaUML** (les modèles sont des étoiles, les relations des constellations).
 
 ## État
 
