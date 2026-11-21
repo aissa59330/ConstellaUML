@@ -175,7 +175,7 @@ describe("layout & rendering", () => {
 
   it("routes edges and places labels like .mdj files do", () => {
     const pts = [{ x: 145, y: 64 }, { x: 356, y: 64 }];
-    // Values taken from a StarUML-shaped file: tail role label of "wrote".
+    // Values taken from a real .mdj file: tail role label of "wrote".
     const c = labelCenter(pts, { edgePosition: 2, alpha: 0.3016189832315833, distance: 47.12748667179272 } as any);
     expect(c.x).toBeCloseTo(190, 0);
     expect(c.y).toBeCloseTo(50, 0);

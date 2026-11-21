@@ -1,6 +1,6 @@
-# Règles de validation (parité)
+# Règles de validation
 
-Codes identiques à ceux de StarUML pour faciliter la migration. Formulation réécrite.
+Chaque règle a un code stable (`UML001`…) utilisé dans les messages et les tests.
 
 | Code | S'applique à | Règle |
 |---|---|---|

@@ -21,7 +21,7 @@ const ADDABLE: [string, string[]][] = [
   ["UMLActivity", ["UMLAction", "UMLObjectNode", "UMLActivityPartition"]],
   ["UMLStateMachine", ["UMLRegion"]],
   ["UMLUseCase", ["UMLExtensionPoint", "UMLAttribute", "UMLOperation"]],
-  // Same order as StarUML's Add menu for classifiers.
+  // Order of the Add menu for classifiers.
   ["UMLClassifier", ["UMLTemplateParameter", "UMLAttribute", "UMLPort", "UMLOperation", "UMLReception", "UMLClass", "UMLInterface", "UMLSignal", "UMLDataType", "UMLPrimitiveType", "UMLEnumeration", "UMLInteraction", "UMLActivity", "UMLStateMachine", "UMLConstraint"]],
   ["UMLRegion", ["UMLState", "UMLPseudostate", "UMLFinalState"]],
   ["UMLState", ["UMLRegion"]],

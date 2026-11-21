@@ -1,8 +1,8 @@
 # Licences
 
 ## Règle du projet
-- Constella ne contient **aucun code, ressource ni fichier de StarUML** (logiciel propriétaire de MKLabs) : pas d'extraction de `app.asar`, pas de copie de `metamodel.json`, d'icônes ou de templates.
-- L'inspiration se limite à l'ergonomie, aux fonctionnalités et à l'**interopérabilité du format de fichier `.mdj`** (noms de types et de champs nécessaires pour lire et écrire les projets).
+- Constella ne contient **aucun code, ressource ni fichier provenant d'un logiciel tiers propriétaire** : métamodèle, icônes et templates sont écrits pour le projet.
+- Le format de fichier `.mdj` est implémenté pour l'**interopérabilité** (noms de types et de champs nécessaires pour lire et écrire les projets).
 - Toute dépendance est ajoutée ici **avant** son intégration, avec sa licence vérifiée.
 
 ## Dépendances
@@ -31,7 +31,6 @@
 | librsvg (`rsvg-convert`, outil système, non embarqué) | conversion SVG → PNG des captures de doc | LGPL-2.1+ | ☑ |
 | fast-check, Playwright | tests (à venir) | MIT / Apache-2.0 | ☐ |
 | maxGraph *(repli seulement)* | moteur de graphes | Apache-2.0 | ☐ |
-| Extensions StarUML open source (ex. générateurs) | inspiration et éventuelle réutilisation | à vérifier une par une (souvent MIT) | ☐ |
 
 ## Auteur
 - Constella est créé par **Aïssa Ouameur** (© 2026) et distribué sous **GPL-3.0 ou ultérieure** (fichier `LICENSE`). Toutes les dépendances ci-dessus (MIT, Apache-2.0, ISC, LGPL, SIL OFL) sont compatibles avec la GPL-3.0.

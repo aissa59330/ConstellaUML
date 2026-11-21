@@ -1,4 +1,4 @@
-// Buttons around the quick-edit field (StarUML-style): visibility on the
+// Buttons around the quick-edit field: visibility on the
 // left, "add" and "add a related class" actions on the right.
 import { For, Show, createSignal } from "solid-js";
 import type { Element } from "../core/element";

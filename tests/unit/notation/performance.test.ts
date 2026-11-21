@@ -125,7 +125,7 @@ describe("quick-edit actions", () => {
     expect(repo.get(made[5]._id)).toBeDefined();
   });
 
-  it("offers StarUML's Add menu entries for a class", () => {
+  it("offers the Add menu entries for a class", () => {
     const { repo, views } = grid(1);
     const types = addableTypes(repo.deref(views[0].model)!);
     expect(types.slice(0, 5)).toEqual(["UMLTemplateParameter", "UMLAttribute", "UMLPort", "UMLOperation", "UMLReception"]);

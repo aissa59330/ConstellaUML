@@ -1,6 +1,6 @@
 # Raccourcis clavier par défaut (Linux)
 
-Parité avec StarUML (source : docs.staruml.io, *Keyboard Shortcuts*). Identifiants de commande au format `domaine:action`.
+Identifiants de commande au format `domaine:action`.
 Ce fichier sert de référence aux tests `KEY-001` : chaque ligne doit déclencher la commande indiquée.
 
 | Commande | Id | Raccourci |

@@ -44,11 +44,11 @@
 - un routage orthogonal maison (A* sur une grille de visibilité) pour les liens rectilinéaires ;
 - **rbush** (MIT) comme index spatial (hit-test, rectangle de sélection, minimap).
 
-maxGraph reste une solution de repli si tu préfères un démarrage plus rapide, au prix des points ci-dessus.
+maxGraph reste une solution de repli pour un démarrage plus rapide, au prix des points ci-dessus.
 
 ## 3. Métamodèle (`core/meta`)
 
-- Déclaratif : `core/meta/*.meta.ts` décrit chaque type (`name`, `super`, `attributes` avec `kind` : `String | Boolean | Integer | Enum | Ref | Refs | Var | Vars | Color | Font | Points`, `container`, `default`). Le métamodèle est **réécrit par nous** à partir de la spécification UML 2.5 de l'OMG et du format de fichier observé. Aucun fichier StarUML n'est copié.
+- Déclaratif : `core/meta/*.meta.ts` décrit chaque type (`name`, `super`, `attributes` avec `kind` : `String | Boolean | Integer | Enum | Ref | Refs | Var | Vars | Color | Font | Points`, `container`, `default`). Le métamodèle est **réécrit par nous** à partir de la spécification UML 2.5 de l'OMG et du format de fichier observé. Aucun fichier tiers n'est copié.
 - Les noms de types (`UMLClass`, `UMLClassView`, `UMLAssociation`, `ERDEntity`…) et les noms de champs suivent le format `.mdj` pour l'interopérabilité (un format de fichier n'est pas du code).
 - Hiérarchie : `Element` → `Model` (`ownedElements`) → … ; `View` → `NodeView` / `EdgeView` ; `Diagram` (`ownedViews`).
 - Des classes TS générées à partir des descripteurs donnent le typage ; le registre `MetaRegistry` est extensible par les plugins (`metamodel.json`).
@@ -101,7 +101,6 @@ maxGraph reste une solution de repli si tu préfères un démarrage plus rapide,
 - Emplacement : `~/.config/constella/extensions/{builtin,user}/<id>/` avec `package.json` (`name, version, engines.constella, main, contributes`).
 - Chargement : ES module importé dans la WebView ; `activate(ctx)` / `deactivate()` ; contributions déclaratives (`menus/`, `keymaps/`, `toolbox/`, `preferences/`, `quickedits/`, `metamodel.json`).
 - API `constella.*` typée et publiée (`@constella/api`, fichiers `.d.ts`) : `commands, menus, keymaps, toolbox, repository, factory, operations, selection, diagrams, notations, generators, validators, dialogs, toast, preferences, events`.
-- Shim `app.*` (best effort) pour réutiliser les extensions StarUML open source.
 - Les diagrammes non UML (ERD, BPMN, C4…) sont eux-mêmes des **extensions intégrées** : c'est la preuve que l'API suffit.
 - Sécurité : une extension a les mêmes droits que l'application (même modèle que VS Code) ; l'installation affiche une confirmation explicite.
 
@@ -153,7 +152,7 @@ Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur 
 - **Séquence** : les messages ont un routeur dédié (`customRouters`) : seule l'ordonnée compte, les activations sont calculées à partir des messages.
 - **Zone peinte** (`setPaintedBounds`) : ce qui est dessiné hors du rectangle d'une vue (nom sous un acteur, labels de messages de communication) compte pour l'export et « ajuster ».
 - **Ombres SVG** : copie décalée semi-transparente plutôt qu'un filtre `feDropShadow`, que librsvg/LibreOffice n'affichent pas.
-- **Timing** : modèle simplifié (`timingStates`, `timeline` = `état@t; …`), à rendre compatible StarUML plus tard.
+- **Timing** : modèle simplifié (`timingStates`, `timeline` = `état@t; …`), à enrichir plus tard.
 
 ## 16. Décisions de la phase 3 (code, reverse, données)
 

@@ -45,7 +45,7 @@ install -Dm644 /dev/stdin "$MIME_DIR/packages/constella.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-constella-mdj">
-    <comment>Projet UML (Constella / StarUML)</comment>
+    <comment>Projet UML (Constella)</comment>
     <glob pattern="*.mdj"/>
     <icon name="constella"/>
   </mime-type>
@@ -77,7 +77,7 @@ Exec=$EXEC %f
 Icon=$ICON_DIR/512x512/apps/constella.png
 Terminal=false
 Categories=Development;Graphics;Education;
-Keywords=UML;diagramme;modélisation;StarUML;ERD;SQL;
+Keywords=UML;diagramme;modélisation;ERD;SQL;
 MimeType=application/x-constella-mdj;application/x-constella-mfj;
 StartupNotify=true
 StartupWMClass=constella

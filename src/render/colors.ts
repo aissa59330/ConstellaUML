@@ -32,7 +32,7 @@ export function paletteRows(): string[][] {
   return [["$background", "$foreground", "$transparent"], ...HUES.map((h) => Array.from({ length: 12 }, (_, i) => `$${h}${i + 1}`))];
 }
 
-/** Fixed light-theme colors (StarUML v7 export, older files). */
+/** Fixed light-theme colors (legacy export, older files). */
 export function toLiteral(color: string): string {
   return resolveColor(color, "light");
 }

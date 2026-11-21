@@ -1,28 +1,20 @@
-# Constella — Cahier des charges & checklist de parité
+# Constella — Cahier des charges & checklist des fonctionnalités
 
-> Outil de modélisation UML desktop pour Linux, inspiré de StarUML (ergonomie et fonctionnalités),
-> **sans aucun code StarUML** (voir [LICENSES.md](LICENSES.md)).
+> Outil de modélisation UML desktop pour Linux (voir aussi [LICENSES.md](LICENSES.md)).
 > Nom de travail : **Constella** (les modèles sont des étoiles, les relations des constellations).
 
 ## État
 
-- **Phase 0** : validée.
-- **Phase 1** (noyau + diagramme de classes) : validée (vérifiée dans l'app à ta demande).
-- **Phase 2** (tous les autres diagrammes UML) : validée (« continue »), retours prévus plus tard.
-- **Phase 3** (génération de code, reverse engineering, ERD, SQL + modèle relationnel et arbre de requête demandés en cours de route) : livrée, en attente de ta validation. Les 14 types sont créables, éditables, sauvegardés en `.mdj` et exportés (tests de rendu par type + images dans [docs/screenshots/diagrams](docs/screenshots/diagrams)). Rien n'est encore marqué `[x]` : il faut ton essai dans l'app native.
-
-## Sources de la phase 0
-
-| Source | Statut |
-|---|---|
-| Documentation officielle https://docs.staruml.io (63 pages : guide utilisateur, 30 diagrammes, API d'extensions) | ✅ lue intégralement |
-| Observation de StarUML sur le poste (computer-use) | ❌ indisponible dans la session : outil non activé. Les points marqués **(à observer)** seront vérifiés plus tard, sur l'app ou à partir de captures |
+- **Phase 0** : terminée.
+- **Phase 1** (noyau + diagramme de classes) : terminée, vérifiée dans l'application.
+- **Phase 2** (tous les autres diagrammes UML) : terminée.
+- **Phase 3** (génération de code, reverse engineering, ERD, SQL, modèle relationnel et arbre de requête) : livrée, en cours de vérification. Les 14 types sont créables, éditables, sauvegardés en `.mdj` et exportés (tests de rendu par type + images dans [docs/screenshots/diagrams](docs/screenshots/diagrams)). Rien n'est encore marqué `[x]` : reste l'essai dans l'application native.
 
 ## Légende
 
-- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (test automatisé + essai dans l'app) · `[~]` implémenté et testé en partie (tests automatisés et/ou version web), **en attente de ta validation dans l'app native** — il ne passera en `[x]` qu'après
+- `[ ]` à faire · `[x]` fait, **fonctionnel et testé** (test automatisé + essai dans l'app) · `[~]` implémenté et testé en partie (tests automatisés et/ou version web), **en attente de vérification dans l'application native** — il ne passera en `[x]` qu'après
 - Une note *partiel* indique ce qui manque encore dans la ligne.
-- **P1…P4** : phase cible · ⭐ : au-delà de StarUML
+- **P1…P4** : phase cible · ⭐ : fonctionnalité avancée
 - Chaque ligne a un identifiant stable (`UI-012`) utilisé dans les commits et les tests.
 
 ---
@@ -42,16 +34,16 @@
 ## 2. Gestion de projet & fichiers
 
 - [~] FILE-001 (P1) Nouveau (`Ctrl+N`), Ouvrir (`Ctrl+O`), Enregistrer (`Ctrl+S`), Enregistrer sous (`Ctrl+Shift+S`), Fermer (avec demande d'enregistrement)
-- [~] FILE-002 (P1) Lecture/écriture `.mdj` compatible StarUML (aller-retour sans perte, types inconnus conservés tels quels) — aller-retour sans perte testé ; réouverture de nos fichiers *dans StarUML* non vérifiée
+- [~] FILE-002 (P1) Lecture/écriture `.mdj` (aller-retour sans perte, types inconnus conservés tels quels) — aller-retour sans perte testé
 - [~] FILE-003 (P1) Fichiers récents
 - [~] FILE-004 (P1) Autosave + récupération après crash — récupération testée en version web
 - [ ] FILE-005 (P2) Nouveau depuis un modèle : UML minimal, UML conventionnel, 4+1, Rational, Data Model, BPMN, C4, Wireframe
 - [~] FILE-006 (P2) Export/import de fragment `.mfj` — export/import disponibles (P1 au lieu de P2)
 - [~] FILE-007 (P1) Couleurs « variables » (`$background`, `$foreground`, `$transparent`, `$<teinte><1..12>`) + conversion à l'ouverture des anciens fichiers (garder/convertir)
-- [ ] FILE-008 (P4) Export au format StarUML v7 (couleurs variables remplacées par les couleurs du thème clair)
+- [ ] FILE-008 (P4) Export à l'ancien format `.mdj` (couleurs variables remplacées par les couleurs du thème clair)
 - [ ] FILE-009 (P4) Import/Export XMI 2.1 (éléments du modèle uniquement)
-- [ ] FILE-010 (P4) Import StarUML v1 (`.uml`) — *optionnel, faible priorité*
-- [x] FILE-011 (P1) ⭐ Sauvegarde **diff-friendly** : JSON trié de façon déterministe, indenté, retours à la ligne stables (option activée par défaut, toujours lisible par StarUML)
+- [ ] FILE-010 (P4) Import de l'ancien format `.uml` — *optionnel, faible priorité*
+- [x] FILE-011 (P1) ⭐ Sauvegarde **diff-friendly** : JSON trié de façon déterministe, indenté, retours à la ligne stables (option activée par défaut)
 - [~] FILE-012 (P1) Ouverture d'un fichier passé en argument / association MIME `.mdj` sous Linux
 
 ## 3. Export
@@ -143,7 +135,7 @@
 - [ ] THM-003 (P2) Raccourcis personnalisables (`~/.config/constella/keymap.json`)
 - [ ] THM-004 (P2) Polices personnalisées (`~/.config/constella/fonts/<police>/font.json`)
 
-### 4.9 Raccourcis clavier (identiques à StarUML sous Linux)
+### 4.9 Raccourcis clavier
 - [~] KEY-001 (P1) Tous les raccourcis listés dans [docs/keymap.md](docs/keymap.md) (69 commandes + raccourcis contextuels), testés automatiquement — tous les raccourcis des fonctions de la phase 1 vérifiés par test ; restent ceux des fonctions des phases suivantes
 
 ---
@@ -157,7 +149,7 @@
 - [ ] QE-004 (P1) Paramètre de template : `[<<st>>] [vis] nom [: type] [= défaut]`
 - [~] QE-005 (P1) Dans le quick-edit : ajouter un attribut (`Ctrl+Entrée`), une opération (`Ctrl+Shift+Entrée`), supprimer (`Ctrl+Suppr`), monter/descendre (`Ctrl+↑/↓`) — ajout testé ; suppression et réordonnancement à valider
 - [~] QE-006 (P1) Quick-edit des extrémités d'association (nom, multiplicité, navigabilité, agrégation)
-- [~] QE-007 (P1) Barre d'édition rapide (comme StarUML) : bouton **Visibilité** (public / protected / private / package) à gauche ; à droite, ajouter attribut / opération / réception / paramètre de template / littéral, et créer une superclasse, une sous-classe, une interface fournie ou requise, une classe associée, agrégée ou composée (placée sans chevauchement, nom directement en saisie) ; sur un attribut ou une opération : ajouter, monter, descendre, supprimer
+- [~] QE-007 (P1) Barre d'édition rapide : bouton **Visibilité** (public / protected / private / package) à gauche ; à droite, ajouter attribut / opération / réception / paramètre de template / littéral, et créer une superclasse, une sous-classe, une interface fournie ou requise, une classe associée, agrégée ou composée (placée sans chevauchement, nom directement en saisie) ; sur un attribut ou une opération : ajouter, monter, descendre, supprimer
 
 ### 5.2 Classes (P1)
 - [x] CLS-001 Classe, Interface (boîte et « lollipop »), Signal, DataType, PrimitiveType, Enumeration (+ littéraux) — interface aussi en « lollipop » (affichage icône)
@@ -196,7 +188,7 @@
 - [~] CMU-001 Lifeline, Connector, Message (numérotés, flèches de direction)
 
 ### 5.11 Timing (P2)
-- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message — *partiel* : lifeline avec états et chronologie (`état@t; …`) et axe gradué ; modèle simplifié, pas encore compatible avec le timing de StarUML ; manquent contraintes et messages
+- [ ] TIM-001 Lifeline, State/Condition, Time Segment, Time Tick, Time Constraint, Duration Constraint, Message — *partiel* : lifeline avec états et chronologie (`état@t; …`) et axe gradué ; modèle simplifié ; manquent contraintes et messages
 
 ### 5.12 Vue d'ensemble des interactions (P2)
 - [~] IOV-001 Interaction Use, Interaction inline, Initial, Final, Fork, Join, Merge, Decision, Control Flow
@@ -272,10 +264,9 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 - [ ] EXT-003 API de plugins **documentée** (`docs/plugin-api.md`) : commandes, menus, raccourcis, toolbox, barre d'outils, accès et modification des éléments (via les opérations, donc annulables), sélection, événements, préférences, dialogues, toasts, nouveaux types de diagramme et de vue, générateurs, règles de validation
 - [ ] EXT-004 Console de script (`Ctrl+Alt+J`) : exécution, historique, `$_`, autocomplétion
 - [ ] EXT-005 Requêtes de sélection d'éléments (`@UMLClass`, `Package::Classe`, filtres)
-- [ ] EXT-006 Couche de compatibilité *best effort* avec l'API `app.*` des extensions StarUML open source
 - [ ] CLI-001 Ligne de commande : `constella image|pdf|html|exec|gen <fichier.mdj>` (sans interface graphique)
 
-## 10. Au-delà de StarUML ⭐ (P4)
+## 10. Fonctionnalités avancées ⭐ (P4)
 
 - [ ] PLUS-001 Import **Mermaid** : classes, séquence, états, flowchart, ER, exigences, mindmap
 - [ ] PLUS-002 Export **Mermaid** pour les mêmes types de diagrammes
@@ -299,6 +290,5 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 ---
 
 ### Hors périmètre (décision à valider)
-- Gestion des licences et de l'activation de StarUML : sans objet.
 - Intégration IA via MCP : possible plus tard sous forme d'extension (P4+), non prioritaire.
-- Langages de génération que StarUML couvre en plus (C, JavaScript, Rust, Go, Ruby, Kotlin, Dart, Swift) : hors demande initiale, mais l'architecture des générateurs les permettra. **À confirmer.**
+- Autres langages de génération (C, JavaScript, Rust, Go, Ruby, Kotlin, Dart, Swift) : hors périmètre initial, mais l'architecture des générateurs les permettra. **À confirmer.**
