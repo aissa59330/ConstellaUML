@@ -1,6 +1,6 @@
 [package]
 name = "constella"
-version = "0.3.0"
+version = "0.3.1"
 description = "ConstellaUML - modeleur UML"
 authors = ["Aïssa Ouameur"]
 license = "GPL-3.0-or-later"
