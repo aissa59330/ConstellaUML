@@ -12,17 +12,30 @@ use crate::mcp::bridge_command;
 const SERVER_NAME: &str = "constella";
 
 fn home() -> PathBuf {
-    std::env::var_os("HOME").map(PathBuf::from).unwrap_or_default()
+    std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_default()
 }
 
 fn desktop_config_path() -> PathBuf {
     #[cfg(target_os = "macos")]
     let dir = home().join("Library/Application Support/Claude");
     #[cfg(target_os = "windows")]
-    let dir = std::env::var_os("APPDATA").map(PathBuf::from).unwrap_or_default().join("Claude");
+    let dir = windows_store_config_dir().unwrap_or_else(|| std::env::var_os("APPDATA").map(PathBuf::from).unwrap_or_default().join("Claude"));
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]
     let dir = std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from).unwrap_or_else(|| home().join(".config")).join("Claude");
     dir.join("claude_desktop_config.json")
+}
+
+/// Claude Desktop installed from the Microsoft Store keeps its settings in
+/// its package's virtualized AppData.
+#[cfg(target_os = "windows")]
+fn windows_store_config_dir() -> Option<PathBuf> {
+    let packages = PathBuf::from(std::env::var_os("LOCALAPPDATA")?).join("Packages");
+    fs::read_dir(packages)
+        .ok()?
+        .filter_map(|e| e.ok())
+        .find(|e| e.file_name().to_string_lossy().starts_with("Claude_"))
+        .map(|e| e.path().join("LocalCache").join("Roaming").join("Claude"))
+        .filter(|d| d.exists())
 }
 
 /// `claude` executable: the PATH of a desktop session often lacks the
@@ -31,7 +44,31 @@ fn claude_cli() -> Option<PathBuf> {
     let mut dirs: Vec<PathBuf> = std::env::var_os("PATH").map(|p| std::env::split_paths(&p).collect()).unwrap_or_default();
     let h = home();
     dirs.extend([h.join(".local/bin"), h.join(".claude/local"), h.join(".npm-global/bin"), h.join(".local/node/bin"), PathBuf::from("/usr/local/bin")]);
-    dirs.into_iter().map(|d| d.join("claude")).find(|p| p.is_file())
+    if let Some(appdata) = std::env::var_os("APPDATA") {
+        dirs.push(PathBuf::from(appdata).join("npm"));
+    }
+    let names: &[&str] = if cfg!(windows) { &["claude.exe", "claude.cmd"] } else { &["claude"] };
+    dirs.into_iter().flat_map(|d| names.iter().map(move |n| d.join(n))).find(|p| p.is_file())
+}
+
+/// Runs the `claude` CLI; `.cmd` shims (npm installs on Windows) go through
+/// cmd.exe, without flashing a console window.
+fn run_cli(cli: &Path, args: &[&str]) -> Result<std::process::Output, String> {
+    let mut cmd = if cli.extension().is_some_and(|e| e.eq_ignore_ascii_case("cmd")) {
+        let mut c = Command::new("cmd");
+        c.arg("/C").arg(cli);
+        c
+    } else {
+        Command::new(cli)
+    };
+    cmd.args(args);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd.output().map_err(|e| e.to_string())
 }
 
 #[derive(serde::Serialize)]
@@ -118,7 +155,7 @@ fn connect_desktop(enable: bool) -> Result<(), String> {
 
 fn connect_code(enable: bool) -> Result<(), String> {
     let cli = claude_cli().ok_or("Claude Code est introuvable (commande « claude »)")?;
-    let run = |args: &[&str]| Command::new(&cli).args(args).output().map_err(|e| e.to_string());
+    let run = |args: &[&str]| run_cli(&cli, args);
     // Re-registering replaces a stale path (moved AppImage, new install).
     let removed = run(&["mcp", "remove", "--scope", "user", SERVER_NAME])?;
     if !enable {
