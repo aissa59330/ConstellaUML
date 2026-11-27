@@ -69,3 +69,47 @@ jobs:
           files: |
             packaging/arch/PKGBUILD
             packaging/LISEZMOI.md
+
+  # pacman package for Arch Linux, rebuilt from the .deb with packaging/arch/PKGBUILD,
+  # signed like the other packages and added to latest.json (target
+  # linux-x86_64-pacman) so the in-app updater can install it through pacman.
+  arch:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    container: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paquet pacman signé
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+        run: |
+          pacman -Syu --noconfirm nodejs npm
+          VER="${GITHUB_REF_NAME#v}"
+          BASE="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME"
+          useradd -m builder
+          mkdir /build && cp packaging/arch/PKGBUILD /build/ && cd /build
+          sed -i "s/^pkgver=.*/pkgver=$VER/" PKGBUILD
+          curl -fsSLO "$BASE/ConstellaUML_${VER}_amd64.deb"
+          chown -R builder /build
+          sudo -u builder makepkg -f --nodeps
+          PKG=$(ls constella-bin-"$VER"-*-x86_64.pkg.tar.zst)
+          npx --yes @tauri-apps/cli@2 signer sign "$PKG"
+          curl -fsSL -o latest.json "$BASE/latest.json"
+          PKG="$PKG" BASE="$BASE" node -e '
+            const fs = require("fs");
+            const j = JSON.parse(fs.readFileSync("latest.json", "utf8"));
+            j.platforms["linux-x86_64-pacman"] = {
+              signature: fs.readFileSync(process.env.PKG + ".sig", "utf8").trim(),
+              url: process.env.BASE + "/" + process.env.PKG,
+            };
+            fs.writeFileSync("latest.json", JSON.stringify(j, null, 2));
+          '
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp "$PKG" "$PKG.sig" latest.json "$GITHUB_WORKSPACE/out/"
+      - name: Publier le paquet et latest.json
+        uses: softprops/action-gh-release@v2
+        with:
+          overwrite_files: true
+          files: out/*

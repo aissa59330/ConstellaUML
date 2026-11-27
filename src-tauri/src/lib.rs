@@ -5,6 +5,7 @@ use tauri::Manager;
 
 mod claude;
 mod mcp;
+mod updates;
 
 pub use mcp::bridge as mcp_bridge;
 
@@ -184,7 +185,9 @@ pub fn run() {
             mcp::mcp_start,
             mcp::mcp_reply,
             claude::claude_status,
-            claude::claude_connect
+            claude::claude_connect,
+            updates::installed_with_pacman,
+            updates::pacman_update
         ])
         .build(tauri::generate_context!())
         .expect("erreur au lancement de ConstellaUML")

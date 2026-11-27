@@ -1,8 +1,9 @@
 # Maintainer: Aïssa Ouameur
 # Repackages the .deb built by `npx tauri build` for Arch Linux.
-# Usage: put ConstellaUML_0.1.0_amd64.deb next to this file, then `makepkg -si`.
+# Usage: put ConstellaUML_<version>_amd64.deb next to this file, then `makepkg -si`.
+# Each release also publishes the built package (constella-bin-*.pkg.tar.zst).
 pkgname=constella-bin
-pkgver=0.3.0
+pkgver=0.3.1
 pkgrel=1
 pkgdesc="Modeleur UML pour Linux (diagrammes UML, entité-relation, génération de code)"
 arch=('x86_64')

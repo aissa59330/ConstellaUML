@@ -1,6 +1,7 @@
 // Application updates: the app checks the latest GitHub release at startup
 // (latest.json, signed packages) and offers to install it, then restarts.
 // "Help ▸ Check for updates" runs the same check and reports "up to date".
+// Arch packages are replaced through pacman (src-tauri/src/updates.rs).
 import { isTauri } from "./platform";
 import { t } from "./i18n";
 import { ask, toast, reportError } from "./store";
@@ -31,8 +32,12 @@ export async function checkForUpdates(manual = false): Promise<void> {
     if (answer !== "install") return;
     toast(t("update.downloading"));
     try {
-      await update.downloadAndInstall();
+      const { invoke } = await import("@tauri-apps/api/core");
+      // Arch: the pacman package is updated through pacman (password asked by the system).
+      if (await invoke<boolean>("installed_with_pacman")) await invoke("pacman_update");
+      else await update.downloadAndInstall();
     } catch (e) {
+      if (String(e).includes("annulée")) return toast(t("update.cancelled"));
       // Packages that cannot replace themselves (.deb/.rpm from a package
       // manager, read-only folder): point to the download page instead.
       console.error(e);
