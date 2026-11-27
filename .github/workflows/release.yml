@@ -1,4 +1,4 @@
-# Builds the packages for each version tag (v0.2.0…) and publishes them in a
+# Builds the packages for each version tag (v0.3.0…) and publishes them in a
 # GitHub release, with the signed update files and latest.json read by the
 # in-app updater. Linux is built on Ubuntu 22.04 (oldest supported glibc).
 #
