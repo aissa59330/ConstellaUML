@@ -130,6 +130,16 @@ constella/
 ├─ FEATURES.md · ARCHITECTURE.md · LICENSES.md
 ```
 
+## 13 bis. Connexion à Claude (MCP)
+
+```
+Claude Desktop / Claude Code ──stdio──▶ constella --mcp ──socket Unix──▶ Rust (mcp.rs) ──événement──▶ WebView (src/ai)
+```
+
+- `src-tauri/src/mcp.rs` : la passerelle répond elle-même à `initialize` et `ping`, et sert `tools/list` depuis `~/.cache/constella/mcp-tools.json` quand l'app est fermée ; elle ne lance Constella qu'au premier `tools/call`. Côté app, le socket (`$XDG_RUNTIME_DIR/constella-$USER/mcp.sock`, droits 0600) relaie chaque ligne JSON-RPC à la WebView (`mcp-request`) qui répond par `mcp_reply`.
+- `src/ai/` (couche entre `notation`/`render` et `ui`) : `tools.ts` définit les outils à partir des commandes de `notation/uml` ; chaque appel d'écriture est **une** opération nommée « Claude : … » (les transactions imbriquées se fondent dans la première), donc Ctrl+Z l'annule. `mcp.ts` traite le JSON-RPC sans état, ce qui permet à la passerelle de se reconnecter à tout moment.
+- `src-tauri/src/claude.rs` : enregistre la passerelle dans `claude_desktop_config.json` (autres réglages conservés, copie `.bak`) ou via `claude mcp add --scope user`.
+
 ## 13. Prérequis de développement
 
 Le poste de développement est un conteneur **Debian 12** (podman/distrobox sur un hôte Arch). Installé en phase 1 :

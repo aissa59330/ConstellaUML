@@ -184,3 +184,26 @@ export async function saveTextAs(defaultName: string, contents: string, filters:
   download(defaultName, contents, "text/plain");
   return defaultName;
 }
+
+// ---- Claude (MCP) -------------------------------------------------------------------
+
+export interface ClaudeClientStatus {
+  available: boolean;
+  configured: boolean;
+  location: string;
+}
+
+export interface ClaudeStatus {
+  command: string;
+  args: string[];
+  desktop: ClaudeClientStatus;
+  code: ClaudeClientStatus;
+}
+
+export async function claudeStatus(): Promise<ClaudeStatus | undefined> {
+  return isTauri ? invoke<ClaudeStatus>("claude_status") : undefined;
+}
+
+export async function claudeConnect(client: "desktop" | "code", enable: boolean): Promise<ClaudeStatus> {
+  return invoke<ClaudeStatus>("claude_connect", { client, enable });
+}

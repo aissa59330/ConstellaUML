@@ -399,6 +399,7 @@ register(
   { id: "tools:reverse", label: "cmd.tools.reverse", run: () => s.setDialog({ kind: "reverse" }), enabled: hasProject },
   { id: "tools:import-sql", label: "cmd.tools.importSql", run: () => s.setDialog({ kind: "sqlImport" }), enabled: hasProject },
   { id: "tools:query-tree", label: "cmd.tools.queryTree", run: () => s.setDialog({ kind: "queryTree" }), enabled: hasProject },
+  { id: "tools:claude", label: "cmd.tools.claude", run: () => s.setDialog({ kind: "claude" }) },
 
   { id: "view:quick-find", label: "cmd.view.quickFind", keys: ["Ctrl+P"], run: () => s.setDialog({ kind: "quickFind" }) },
   { id: "view:command-palette", label: "cmd.view.commandPalette", keys: ["Ctrl+Shift+P"], run: () => s.setDialog({ kind: "palette" }) },
@@ -611,6 +612,8 @@ export const MAIN_MENU: { label: string; items: MenuItem[] }[] = [
       { sep: true },
       { cmd: "tools:import-sql" },
       { cmd: "tools:query-tree" },
+      { sep: true },
+      { cmd: "tools:claude" },
       { sep: true },
       { cmd: "view:command-palette" },
     ],

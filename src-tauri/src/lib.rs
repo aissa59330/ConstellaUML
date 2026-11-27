@@ -3,6 +3,11 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use tauri::Manager;
 
+mod claude;
+mod mcp;
+
+pub use mcp::bridge as mcp_bridge;
+
 fn err<E: std::fmt::Display>(e: E) -> String {
     e.to_string()
 }
@@ -14,7 +19,7 @@ fn read_text_file(path: String) -> Result<String, String> {
 
 /// Writes through a temporary file then renames it, so a crash never leaves a
 /// half-written model behind.
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
+pub(crate) fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let dir = path.parent().ok_or("chemin invalide")?;
     fs::create_dir_all(dir).map_err(err)?;
     let tmp = dir.join(format!(
@@ -165,6 +170,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init());
     builder
+        .manage(std::sync::Arc::new(mcp::McpState::default()))
         .invoke_handler(tauri::generate_handler![
             read_text_file,
             write_text_file,
@@ -174,10 +180,19 @@ pub fn run() {
             autosave_clear,
             startup_file,
             read_source_tree,
-            write_files
+            write_files,
+            mcp::mcp_start,
+            mcp::mcp_reply,
+            claude::claude_status,
+            claude::claude_connect
         ])
-        .run(tauri::generate_context!())
-        .expect("erreur au lancement de ConstellaUML");
+        .build(tauri::generate_context!())
+        .expect("erreur au lancement de ConstellaUML")
+        .run(|_, event| {
+            if let tauri::RunEvent::Exit = event {
+                mcp::cleanup();
+            }
+        });
 }
 
 #[cfg(test)]

@@ -287,8 +287,13 @@ Boîte unifiée par langage, avec un onglet Générer et un onglet Reverse : paq
 - [ ] PKG-L3 (P4) `.rpm`
 - [ ] PKG-L4 (P4) Entrée de menu `.desktop`, icônes, association MIME `.mdj` / `.mfj`
 
+### Claude (MCP)
+- [x] AI-1 Serveur MCP : `constella --mcp` (stdio) relaie Claude vers la fenêtre ouverte par un socket Unix ; l'app est lancée au premier appel d'outil seulement
+- [x] AI-2 Outils : contexte, arborescence, détail d'un élément, contenu d'un diagramme, outils par type de diagramme, créer un diagramme / un élément / un lien / des membres, modifier, supprimer, disposition automatique, aperçu PNG, annulation
+- [x] AI-3 Chaque appel d'écriture = une opération « Claude : … » annulable par Ctrl+Z ; mode lecture seule
+- [x] AI-4 Bouton « Claude » (barre d'outils, Outils ▸ Connecter Claude…) : enregistrement dans Claude Desktop et Claude Code, état de connexion, configuration manuelle
+
 ---
 
 ### Hors périmètre (décision à valider)
-- Intégration IA via MCP : possible plus tard sous forme d'extension (P4+), non prioritaire.
 - Autres langages de génération (C, JavaScript, Rust, Go, Ruby, Kotlin, Dart, Swift) : hors périmètre initial, mais l'architecture des générateurs les permettra. **À confirmer.**

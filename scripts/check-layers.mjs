@@ -1,5 +1,5 @@
 // Enforces the layer rules of ARCHITECTURE.md: core ← notation ← render ← editor ← ui;
-// io and codegen depend on core only.
+// io and codegen depend on core only; ai (tools offered to Claude) sits beside editor.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, dirname } from "node:path";
 
@@ -10,7 +10,8 @@ const ALLOWED = {
   notation: ["core", "notation", "render"],
   render: ["core", "notation", "render"],
   editor: ["core", "notation", "render", "editor"],
-  ui: ["core", "io", "codegen", "notation", "render", "editor", "ui"],
+  ai: ["core", "notation", "render", "ai"],
+  ui: ["core", "io", "codegen", "notation", "render", "editor", "ai", "ui"],
 };
 
 const files = [];

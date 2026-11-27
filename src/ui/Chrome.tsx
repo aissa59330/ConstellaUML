@@ -4,6 +4,7 @@ import { meta } from "../core/meta/registry";
 import { MAIN_MENU, activeEditor, command, execute, painterSource, shortcutLabel } from "./commands";
 import { lang, t } from "./i18n";
 import { Icon } from "./icons";
+import { mcpClients } from "./claude";
 import { MenuList } from "./Menu";
 import * as s from "./store";
 
@@ -106,6 +107,13 @@ export function Toolbar() {
         <ToolButton cmd="view:navigator" icon="panelRight" />
       </Show>
       <div class="toolbar-spacer" />
+      <button class="toolbar-claude" classList={{ connected: mcpClients() > 0 }} onClick={() => execute("tools:claude")} title={mcpClients() > 0 ? t("claude.active", { n: mcpClients() }) : t("cmd.tools.claude")}>
+        <Icon name="claude" />
+        <span>Claude</span>
+        <Show when={mcpClients() > 0}>
+          <span class="claude-dot on" />
+        </Show>
+      </button>
       <button class="toolbar-search" onClick={() => execute("view:command-palette")} title={t("cmd.view.commandPalette")}>
         <Icon name="search" />
         <span>{t("cmd.view.commandPalette")}</span>

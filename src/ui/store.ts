@@ -202,6 +202,7 @@ export type DialogState =
   | { kind: "reverse" }
   | { kind: "sqlImport" }
   | { kind: "queryTree" }
+  | { kind: "claude" }
   | { kind: "confirm"; message: string; buttons: { label: string; value: string; primary?: boolean }[]; resolve: (v: string) => void };
 export const [dialog, setDialog] = createSignal<DialogState | null>(null);
 

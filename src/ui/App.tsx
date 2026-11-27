@@ -1,5 +1,6 @@
 import { For, Show, createEffect, onCleanup, onMount } from "solid-js";
 import { MenuBar, StatusBar, Toolbar, windowWidth } from "./Chrome";
+import { startClaudeBridge } from "./claude";
 import { handleShortcut } from "./commands";
 import { DiagramArea } from "./DiagramArea";
 import { Dialogs, FindResults } from "./Dialogs";
@@ -62,6 +63,7 @@ export function App() {
     s.startAutosave();
     // Quietly look for a newer version once the window is up.
     setTimeout(() => void checkForUpdates(), 3000);
+    startClaudeBridge().catch(s.reportError);
     if (platform.isTauri) {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
       const win = getCurrentWindow();

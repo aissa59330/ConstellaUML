@@ -288,6 +288,13 @@ const P: Record<string, () => JSX.Element> = {
   moon: () => <path d="M13.5 9.5A6 6 0 016.5 2.5a6 6 0 107 7z" />,
   search: () => <path d="M7 12A5 5 0 107 2a5 5 0 000 10zM11 11l3 3" />,
   close: () => <path d="M4 4l8 8M12 4l-8 8" />,
+  claude: () => <path d="M8 1.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" />,
+  copy: () => (
+    <>
+      <rect x="5" y="5" width="9" height="9" rx="1" />
+      <path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2" />
+    </>
+  ),
   chevronRight: () => <path d="M6 3l5 5-5 5" />,
   chevronDown: () => <path d="M3 6l5 5 5-5" />,
   more: () => <path d="M3 8h.01M8 8h.01M13 8h.01" stroke-width="2.5" />,

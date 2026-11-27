@@ -13,6 +13,7 @@ import { Icon, iconForType } from "./icons";
 import * as s from "./store";
 import { Modal } from "./Modal";
 import { CodeGenDialog, QueryTreeDialog, ReverseDialog, SqlImportDialog } from "./CodeDialogs";
+import { ClaudeDialog } from "./ClaudeDialog";
 
 const close = () => s.setDialog(null);
 const selectedViews = () => s.selection().filter((e) => meta.isKindOf(e._type, "View"));
@@ -470,6 +471,9 @@ export function Dialogs() {
           </Match>
           <Match when={d().kind === "queryTree"}>
             <QueryTreeDialog />
+          </Match>
+          <Match when={d().kind === "claude"}>
+            <ClaudeDialog />
           </Match>
           <Match when={d().kind === "shortcuts"}>
             <ShortcutsDialog />

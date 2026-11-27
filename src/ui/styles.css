@@ -1462,3 +1462,115 @@ textarea.field-input {
 .qe-menu .menu-item.on {
   background: var(--accent-soft);
 }
+
+/* ---- Claude ---------------------------------------------------------------------- */
+
+.toolbar-claude {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  margin-right: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.toolbar-claude:hover {
+  background: var(--surface-2);
+  color: inherit;
+}
+
+.toolbar-claude.connected {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.claude-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  flex: none;
+}
+
+.claude-dot.on {
+  background: var(--success);
+}
+
+.claude-intro {
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.claude-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.claude-clients {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.claude-client {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.claude-client-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.claude-client-text span,
+.claude-note,
+.claude-manual p {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.claude-write {
+  margin-bottom: 10px;
+}
+
+.claude-manual summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.claude-manual pre {
+  margin: 6px 0 8px;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow-x: auto;
+  user-select: text;
+}
+
+.claude-manual .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .toolbar-claude span:not(.claude-dot) {
+    display: none;
+  }
+}
